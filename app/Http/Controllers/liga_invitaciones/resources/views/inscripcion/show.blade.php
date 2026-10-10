@@ -1,0 +1,70 @@
+<x-guest-layout>
+    <div class="mb-4 text-sm text-gray-600">
+        Te estás uniendo al equipo <strong>{{ $equipo->nombre }}</strong>
+        como <strong>{{ $invitacion->tipo === 'dt' ? 'Director Técnico' : 'Jugador' }}</strong>.
+    </div>
+
+    <form method="POST" action="{{ route('invitacion.store', $invitacion->token) }}">
+        @csrf
+
+        {{-- Nombre --}}
+        <div>
+            <x-input-label for="name" value="Nombre" />
+            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
+                          :value="old('name')" required autofocus autocomplete="name" />
+            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        </div>
+
+        {{-- Email --}}
+        <div class="mt-4">
+            <x-input-label for="email" value="Correo" />
+            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
+                          :value="old('email')" required autocomplete="username" />
+            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        {{-- Contraseña --}}
+        <div class="mt-4">
+            <x-input-label for="password" value="Contraseña" />
+            <x-text-input id="password" name="password" type="password" class="mt-1 block w-full"
+                          required autocomplete="new-password" />
+            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        </div>
+
+        {{-- Confirmar contraseña --}}
+        <div class="mt-4">
+            <x-input-label for="password_confirmation" value="Confirmar contraseña" />
+            <x-text-input id="password_confirmation" name="password_confirmation" type="password"
+                          class="mt-1 block w-full" required autocomplete="new-password" />
+            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        </div>
+
+        {{-- Campos extra solo para jugador --}}
+        @if ($invitacion->tipo === 'jugador')
+            <div class="mt-4">
+                <x-input-label for="dorsal" value="Dorsal (opcional)" />
+                <x-text-input id="dorsal" name="dorsal" type="number" min="1" max="99"
+                              class="mt-1 block w-full" :value="old('dorsal')" />
+                <x-input-error :messages="$errors->get('dorsal')" class="mt-2" />
+            </div>
+
+            <div class="mt-4">
+                <x-input-label for="posicion" value="Posición (opcional)" />
+                <x-text-input id="posicion" name="posicion" type="text" class="mt-1 block w-full"
+                              :value="old('posicion')" />
+                <x-input-error :messages="$errors->get('posicion')" class="mt-2" />
+            </div>
+        @endif
+
+        {{-- Error de cupo lleno --}}
+        @error('cupo')
+            <p class="mt-4 text-sm font-medium text-red-600">{{ $message }}</p>
+        @enderror
+
+        <div class="mt-6 flex items-center justify-end">
+            <x-primary-button>
+                Crear cuenta y unirme
+            </x-primary-button>
+        </div>
+    </form>
+</x-guest-layout>
