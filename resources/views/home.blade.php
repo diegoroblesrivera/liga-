@@ -1,7 +1,17 @@
 <x-publico-layout>
     {{-- Qué es la app --}}
-    <section class="franjas-cesped rounded-2xl px-4 py-10 shadow-sm sm:px-10 sm:py-14">
-        <div class="mx-auto max-w-3xl rounded-2xl border-4 border-white bg-balon px-6 py-10 text-center shadow-xl sm:px-12">
+    <section class="relative overflow-hidden rounded-2xl bg-balon bg-[url('/videos/portada.jpg')] bg-cover bg-center shadow-sm">
+        {{-- Video de fondo: toma aérea de canchas al amanecer (Pixabay, licencia libre sin atribución).
+             Mudo y en bucle de ida y vuelta; con "reducir movimiento" queda la imagen fija. --}}
+        <video class="video-portada absolute inset-0 h-full w-full object-cover"
+               autoplay muted loop playsinline preload="auto" aria-hidden="true"
+               poster="{{ asset('videos/portada.jpg') }}">
+            <source src="{{ asset('videos/portada.mp4') }}" type="video/mp4">
+        </video>
+        <div class="absolute inset-0 bg-balon/50"></div>
+
+        <div class="relative px-4 py-10 sm:px-10 sm:py-16">
+        <div class="mx-auto max-w-3xl rounded-2xl border-4 border-white bg-balon/85 px-6 py-10 text-center shadow-xl backdrop-blur-sm sm:px-12">
             <h1 class="titulo-deportivo text-3xl text-white sm:text-5xl">Tu fútbol, organizado</h1>
             <p class="marcador mt-3 text-4xl text-cancha-400 sm:text-5xl">Pichangas · Campeonatos</p>
             <p class="mx-auto mt-5 max-w-2xl text-gray-200">
@@ -20,8 +30,9 @@
                 </a>
             </div>
             @guest
-                <p class="mt-4 text-sm text-gray-400">Gratis. Entra con tu cuenta de Google o con tu correo.</p>
+                <p class="mt-4 text-sm text-gray-300">Gratis. Entra con tu cuenta de Google o con tu correo.</p>
             @endguest
+        </div>
         </div>
     </section>
 

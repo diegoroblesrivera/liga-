@@ -5,6 +5,11 @@
 /* Alpine: oculta elementos x-show hasta que Alpine arranca */
 [x-cloak] { display: none !important; }
 
+/* Quien pidió "reducir movimiento" en su sistema ve la imagen fija de la portada */
+@media (prefers-reduced-motion: reduce) {
+    .video-portada { display: none; }
+}
+
 @layer components {
     /* Franjas de césped cortado (portada, login, borde bajo el menú) */
     .franjas-cesped {
