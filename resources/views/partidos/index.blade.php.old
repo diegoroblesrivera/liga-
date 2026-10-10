@@ -1,0 +1,96 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">Fixture</h2>
+
+            @can('create', App\Models\Partido::class)
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('fixtures.create') }}"
+                       class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Generar fixture
+                    </a>
+                    <a href="{{ route('partidos.create') }}"
+                       class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+                        Programar partido
+                    </a>
+                </div>
+            @endcan
+        </div>
+    </x-slot>
+
+    <div class="py-8">
+        <div class="mx-auto max-w-4xl space-y-6 sm:px-6 lg:px-8">
+
+            @if (session('status'))
+                <div class="rounded-md bg-green-50 p-4 text-sm text-green-700">{{ session('status') }}</div>
+            @endif
+
+            @forelse ($partidos as $numeroFecha => $delaFecha)
+                @php($esActual = $fechaActual !== null && (int) $numeroFecha === (int) $fechaActual)
+
+                <div id="fecha-{{ $numeroFecha }}"
+                     @if ($esActual) data-fecha-actual="1" @endif
+                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg scroll-mt-24 {{ $esActual ? 'ring-1 ring-[#f53003]' : '' }}">
+
+                    <h3 class="flex items-center justify-between border-b border-gray-100 px-6 py-3 text-sm font-medium text-gray-700">
+                        <span>Fecha {{ $numeroFecha }}</span>
+                        @if ($esActual)
+                            <span class="rounded-sm border border-[#19140035] px-2 py-0.5 text-xs font-medium text-[#f53003]">
+                                Próxima fecha
+                            </span>
+                        @endif
+                    </h3>
+
+                    @foreach ($delaFecha as $partido)
+                        <a href="{{ route('partidos.show', $partido) }}"
+                           class="flex items-center justify-between border-b border-gray-100 px-6 py-4 last:border-0 hover:bg-gray-50">
+                            <div class="text-sm">
+                                <span class="font-medium text-gray-900">{{ $partido->equipoLocal->nombre }}</span>
+                                @if ($partido->estaFinalizado())
+                                    <span class="mx-2 font-semibold text-gray-900">{{ $partido->goles_local }} - {{ $partido->goles_visita }}</span>
+                                @else
+                                    <span class="mx-2 text-gray-400">vs</span>
+                                @endif
+                                <span class="font-medium text-gray-900">{{ $partido->equipoVisita->nombre }}</span>
+                            </div>
+                            <div class="text-right text-xs text-gray-500">
+                                <div>{{ $partido->fecha_hora?->format('d/m/Y H:i') ?? 'Sin fecha' }}</div>
+                                <div>{{ $partido->cancha?->nombre }}</div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            @empty
+                <div class="bg-white p-6 text-sm text-gray-500 shadow-sm sm:rounded-lg">
+                    Aun no hay partidos programados.
+                </div>
+            @endforelse
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Si llegamos con un ancla explícita (ej: #fecha-7 desde "Reprogramar"),
+            // esa manda por sobre la jornada actual.
+            if (window.location.hash && window.location.hash.startsWith('#fecha-')) {
+                var el = document.querySelector(window.location.hash);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    el.classList.add('ring-2', 'ring-[#f53003]');
+                    setTimeout(function () {
+                        el.classList.remove('ring-2', 'ring-[#f53003]');
+                    }, 2000);
+                }
+                return;
+            }
+
+            // Sin ancla explícita: como ya viene primera en el listado, no hace
+            // falta hacer scroll, pero la dejamos visible por si el layout cambia.
+            var actual = document.querySelector('[data-fecha-actual="1"]');
+            if (actual) {
+                actual.scrollIntoView({ behavior: 'instant', block: 'start' });
+            }
+        });
+    </script>
+</x-app-layout>
