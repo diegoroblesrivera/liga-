@@ -15,6 +15,17 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'torneos' => \App\Http\Middleware\EnsureParticipaEnTorneos::class,
         ]);
+
+        // Campeonato actual del usuario (filtra equipos, torneos, partidos...).
+        // Debe correr ANTES de SubstituteBindings: si no, /equipos/{equipo} buscaría
+        // el equipo sin filtro y se podría abrir uno de otro campeonato.
+        $middleware->web(append: [
+            \App\Http\Middleware\ResolverLigaActual::class,
+        ]);
+        $middleware->prependToPriorityList(
+            before: \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            prepend: \App\Http\Middleware\ResolverLigaActual::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

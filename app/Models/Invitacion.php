@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PerteneceALiga;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Invitacion extends Model
 {
+    use PerteneceALiga;
+
     protected $table = 'invitaciones';
 
     protected $fillable = [

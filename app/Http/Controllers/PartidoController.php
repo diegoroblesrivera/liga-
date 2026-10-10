@@ -6,7 +6,7 @@ use App\Models\Cancha;
 use App\Models\Equipo;
 use App\Models\Partido;
 use App\Models\Torneo;
-use App\Models\User;
+use App\Support\LigaActual;
 use Illuminate\Http\Request;
 
 class PartidoController extends Controller
@@ -69,8 +69,7 @@ class PartidoController extends Controller
             'pagos',
         ]);
 
-        $arbitros = User::whereHas('roles', fn ($q) => $q->where('nombre', 'arbitro'))
-            ->orderBy('name')->get();
+        $arbitros = LigaActual::liga()->arbitros()->orderBy('name')->get();
 
         $canchas = Cancha::orderBy('nombre')->get();
 
@@ -100,7 +99,7 @@ class PartidoController extends Controller
 
         $data = $request->validate([
             'fecha_hora' => ['nullable', 'date'],
-            'cancha_id' => ['nullable', 'exists:canchas,id'],
+            'cancha_id' => ['nullable', LigaActual::existe('canchas')],
         ]);
 
         $partido->update([
@@ -117,7 +116,7 @@ class PartidoController extends Controller
         $this->authorize('update', $partido);
 
         $data = $request->validate([
-            'arbitro_id' => ['nullable', 'exists:users,id'],
+            'arbitro_id' => ['nullable', LigaActual::existeArbitro()],
         ]);
 
         $partido->update(['arbitro_id' => $data['arbitro_id'] ?? null]);
@@ -182,20 +181,19 @@ class PartidoController extends Controller
             'torneos' => Torneo::orderBy('nombre')->get(),
             'equipos' => Equipo::orderBy('nombre')->get(),
             'canchas' => Cancha::orderBy('nombre')->get(),
-            'arbitros' => User::whereHas('roles', fn ($q) => $q->where('nombre', 'arbitro'))
-                ->orderBy('name')->get(),
+            'arbitros' => LigaActual::liga()->arbitros()->orderBy('name')->get(),
         ];
     }
 
     protected function validar(Request $request): array
     {
         return $request->validate([
-            'torneo_id' => ['required', 'exists:torneos,id'],
+            'torneo_id' => ['required', LigaActual::existe('torneos')],
             'numero_fecha' => ['required', 'integer', 'min:1'],
-            'equipo_local_id' => ['required', 'exists:equipos,id'],
-            'equipo_visita_id' => ['required', 'different:equipo_local_id', 'exists:equipos,id'],
-            'cancha_id' => ['nullable', 'exists:canchas,id'],
-            'arbitro_id' => ['nullable', 'exists:users,id'],
+            'equipo_local_id' => ['required', LigaActual::existe('equipos')],
+            'equipo_visita_id' => ['required', 'different:equipo_local_id', LigaActual::existe('equipos')],
+            'cancha_id' => ['nullable', LigaActual::existe('canchas')],
+            'arbitro_id' => ['nullable', LigaActual::existeArbitro()],
             'fecha_hora' => ['nullable', 'date'],
         ], [
             'equipo_visita_id.different' => 'El local y la visita no pueden ser el mismo equipo.',

@@ -6,6 +6,7 @@ use App\Models\Invitacion;
 use App\Models\Jugador;
 use App\Models\Role;
 use App\Models\User;
+use App\Support\LigaActual;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -20,16 +21,23 @@ class InscripcionController extends Controller
     {
         $invitacion = $this->invitacionValida($token);
 
-        return view('inscripcion.show', [
+        // El link puede ser de un campeonato distinto al que el usuario tiene abierto.
+        return LigaActual::usar($invitacion->liga, fn () => view('inscripcion.show', [
             'invitacion' => $invitacion,
             'equipo' => $invitacion->equipo,
-        ]);
+        ])->render());
     }
 
     // Procesa el registro: crea el usuario y, si corresponde, su ficha de jugador.
     public function store(Request $request, string $token)
     {
         $invitacion = $this->invitacionValida($token);
+
+        return LigaActual::usar($invitacion->liga, fn () => $this->registrar($request, $invitacion));
+    }
+
+    protected function registrar(Request $request, Invitacion $invitacion)
+    {
         $equipo = $invitacion->equipo;
 
         // ¿Esta persona tendrá ficha de jugador?
@@ -62,6 +70,13 @@ class InscripcionController extends Controller
                 // Rol principal según el tipo de invitación.
                 $user->roles()->attach(Role::where('nombre', $invitacion->tipo)->firstOrFail()->id);
 
+                // El árbitro lo es de ESTE campeonato (DT y jugador quedan ligados por su equipo).
+                if ($invitacion->tipo === 'arbitro') {
+                    $user->ligas()->attach($invitacion->liga_id, ['rol' => 'arbitro']);
+                }
+
+                $user->forceFill(['ultima_liga_id' => $invitacion->liga_id])->save();
+
                 if ($jugar) {
                     // Un DT que además juega suma el rol jugador.
                     if ($invitacion->tipo === 'dt') {
@@ -88,14 +103,16 @@ class InscripcionController extends Controller
 
         event(new Registered($user));
         Auth::login($user);
+        $request->session()->put('liga_id', $invitacion->liga_id);
 
         return redirect()->route('dashboard');
     }
 
     // Valida el token: 404 si no existe, 410 si ya no es utilizable.
+    // Sin el filtro por campeonato: el token es lo que da acceso.
     protected function invitacionValida(string $token): Invitacion
     {
-        $invitacion = Invitacion::where('token', $token)->firstOrFail();
+        $invitacion = Invitacion::withoutGlobalScopes()->where('token', $token)->firstOrFail();
 
         abort_unless($invitacion->esValida(), 410, 'Esta invitación ya no es válida.');
 

@@ -22,6 +22,8 @@ use App\Http\Controllers\TorneoController;
 use App\Http\Controllers\PichangaController;
 use App\Http\Controllers\PichangaFechaController;
 use App\Http\Controllers\PichangaPagoController;
+use App\Http\Controllers\CampeonatoController;
+use App\Http\Controllers\CampeonatoPublicoController;
 
 
 // Registro por invitación a un equipo (público)
@@ -40,6 +42,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::put('/profile/acceso', [ProfileController::class, 'updateAcceso'])->name('profile.acceso.update');
+
+    // Campeonatos: cualquier usuario crea el suyo; cambiar entre los que participa
+    Route::get('/campeonatos/crear', [CampeonatoController::class, 'create'])->name('campeonatos.create');
+    Route::post('/campeonatos', [CampeonatoController::class, 'store'])->name('campeonatos.store');
+    Route::post('/campeonatos/{liga}/usar', [CampeonatoController::class, 'usar'])->name('campeonatos.usar');
 });
 
 // Campeonato: solo quienes participan en algún torneo (admin, DT, jugador o árbitro).
@@ -109,6 +116,8 @@ Route::get('/pagos/exportar/pdf', [PagoPartidoController::class, 'exportarPdf'])
 
 // Configuración (panel de administración)
 Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion.index');
+Route::get('/configuracion/campeonato', [CampeonatoController::class, 'edit'])->name('campeonatos.edit');
+Route::put('/configuracion/campeonato', [CampeonatoController::class, 'update'])->name('campeonatos.update');
 Route::get('/jugadores', [JugadorController::class, 'index'])->name('jugadores.index');
 
 // Canchas (CRUD, solo admin)
@@ -154,5 +163,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/pichangas/fechas/{fecha}/comprobante', [PichangaPagoController::class, 'store'])->name('pichangas.comprobante.store');
     Route::get('/pichangas/asistencias/{asistencia}/comprobante', [PichangaPagoController::class, 'show'])->name('pichangas.comprobante.show');
 });
+
+// Página pública de un campeonato (después de /campeonatos/crear para no capturarla)
+Route::get('/campeonatos/{liga}', [CampeonatoPublicoController::class, 'show'])->name('campeonatos.publico');
 
 require __DIR__.'/auth.php';

@@ -3,20 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invitacion;
-use App\Models\User;
+use App\Support\LigaActual;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class ArbitroController extends Controller
 {
-    // Listado de árbitros + botón para generar el link (solo admin).
+    // Árbitros del campeonato + botón para generar el link (solo admin).
     public function index(Request $request)
     {
         abort_unless($request->user()->hasRole('admin'), 403);
 
-        $arbitros = User::whereHas('roles', fn ($q) => $q->where('nombre', 'arbitro'))
-            ->orderBy('name')
-            ->get();
+        $arbitros = LigaActual::liga()->arbitros()->orderBy('name')->get();
 
         return view('arbitros.index', compact('arbitros'));
     }

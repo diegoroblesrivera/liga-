@@ -1,0 +1,26 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">Crear campeonato</h2>
+    </x-slot>
+
+    <div class="py-8">
+        <div class="mx-auto max-w-xl space-y-4 sm:px-6 lg:px-8">
+            <div class="rounded-md bg-indigo-50 p-4 text-sm text-indigo-800">
+                Vas a quedar como <strong>dueño</strong> del campeonato: podrás crear canchas y equipos,
+                invitar a los DT y árbitros, generar el fixture y llevar los pagos.
+            </div>
+
+            <div class="bg-white p-6 shadow-sm sm:rounded-lg">
+                <form method="POST" action="{{ route('campeonatos.store') }}" class="space-y-4">
+                    @csrf
+                    @include('campeonatos._form')
+
+                    <div class="flex items-center justify-end gap-4 pt-2">
+                        <a href="{{ route('dashboard') }}" class="text-sm text-gray-600 hover:text-gray-900">Cancelar</a>
+                        <x-primary-button>Crear campeonato</x-primary-button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</x-app-layout>

@@ -2,6 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Equipo;
+use App\Models\Jugador;
+use App\Models\Modalidad;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,10 +15,23 @@ class SeccionesTest extends TestCase
 {
     use RefreshDatabase;
 
+    // Usuario que participa de verdad en el campeonato 1 con ese rol.
     protected function conRol(string $rol): User
     {
         $user = User::factory()->create();
         $user->roles()->attach(Role::firstOrCreate(['nombre' => $rol])->id);
+
+        $equipo = Equipo::forceCreate([
+            'liga_id' => 1,
+            'nombre' => 'Equipo '.$user->id,
+            'modalidad_id' => Modalidad::value('id'),
+        ]);
+
+        match ($rol) {
+            'jugador' => Jugador::forceCreate(['equipo_id' => $equipo->id, 'user_id' => $user->id, 'nombre' => $user->name]),
+            'dt' => $user->forceFill(['equipo_id' => $equipo->id])->save(),
+            default => $user->ligas()->attach(1, ['rol' => $rol]), // admin / arbitro
+        };
 
         return $user;
     }
@@ -39,6 +55,7 @@ class SeccionesTest extends TestCase
         $this->actingAs($user)->get('/dashboard')
             ->assertOk()
             ->assertSee('No participas en ningún torneo')
+            ->assertSee('Crear campeonato')
             ->assertSee('Ver mis pichangas')
             ->assertDontSee('Ver mis torneos')
             ->assertDontSee(route('tablas.posiciones'))

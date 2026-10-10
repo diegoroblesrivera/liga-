@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Equipo;
 use App\Models\Modalidad;
+use App\Support\LigaActual;
 use Illuminate\Http\Request;
 
 class EquipoController extends Controller
@@ -34,7 +35,7 @@ class EquipoController extends Controller
         $this->authorize('create', Equipo::class);
 
         $data = $request->validate([
-            'nombre' => ['required', 'string', 'max:120', 'unique:equipos,nombre'],
+            'nombre' => ['required', 'string', 'max:120', LigaActual::unico('equipos', 'nombre')],
             'modalidad_id' => ['required', 'exists:modalidades,id'],
             'color_camiseta' => ['nullable', 'string', 'max:30'],
             'escudo' => ['nullable', 'image', 'max:2048'],
@@ -85,7 +86,7 @@ class EquipoController extends Controller
         ];
 
         if ($esAdmin) {
-            $reglas['nombre'] = ['required', 'string', 'max:120', 'unique:equipos,nombre,'.$equipo->id];
+            $reglas['nombre'] = ['required', 'string', 'max:120', LigaActual::unico('equipos', 'nombre', $equipo->id)];
             $reglas['modalidad_id'] = ['required', 'exists:modalidades,id'];
         }
 

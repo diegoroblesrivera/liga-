@@ -6,11 +6,13 @@ use App\Models\Cancha;
 use App\Models\Equipo;
 use App\Models\Gol;
 use App\Models\Jugador;
+use App\Models\Liga;
 use App\Models\Modalidad;
 use App\Models\Partido;
 use App\Models\Role;
 use App\Models\Torneo;
 use App\Models\User;
+use App\Support\LigaActual;
 use Illuminate\Database\Seeder;
 
 class LigaDemoSeeder extends Seeder
@@ -35,6 +37,16 @@ class LigaDemoSeeder extends Seeder
             'password' => 'password',
         ]);
         $arbitro->roles()->attach($roles['arbitro']);
+
+        // ---------- Campeonato ----------
+        // La liga 1 la crea la migración de ligas; todo lo que sigue pertenece a ella.
+        $liga = Liga::findOrFail(1);
+        $liga->update(['owner_id' => $admin->id]);
+        $liga->usuarios()->syncWithoutDetaching([
+            $admin->id => ['rol' => 'owner'],
+            $arbitro->id => ['rol' => 'arbitro'],
+        ]);
+        LigaActual::fijar($liga);
 
         // ---------- Equipos (los crea el admin) ----------
         $tigres = Equipo::create(['nombre' => 'Los Tigres', 'modalidad_id' => $futbolito->id]);

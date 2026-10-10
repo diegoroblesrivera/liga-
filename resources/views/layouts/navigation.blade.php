@@ -1,3 +1,9 @@
+@php
+    $ligaActual = \App\Support\LigaActual::liga();
+    $misLigas = $ligaActual
+        ? \App\Models\Liga::whereIn('id', auth()->user()->ligasIds())->orderBy('nombre')->get()
+        : collect();
+@endphp
 <nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,6 +68,33 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                {{-- Campeonato actual y cambio entre los que participa --}}
+                @if ($ligaActual)
+                    <x-dropdown align="right" width="w-64">
+                        <x-slot name="trigger">
+                            <button class="inline-flex max-w-[14rem] items-center rounded-md px-3 py-2 text-sm font-medium leading-4 text-indigo-700 hover:bg-indigo-50 focus:outline-none">
+                                <span class="truncate">🏆 {{ $ligaActual->nombre }}</span>
+                                <svg class="ms-1 h-4 w-4 shrink-0 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </x-slot>
+                        <x-slot name="content">
+                            <div class="px-4 py-2 text-xs uppercase tracking-wide text-gray-400">Tus campeonatos</div>
+                            @foreach ($misLigas as $l)
+                                <form method="POST" action="{{ route('campeonatos.usar', $l) }}">
+                                    @csrf
+                                    <button type="submit" class="block w-full px-4 py-2 text-start text-sm leading-5 hover:bg-gray-100 {{ $l->id === $ligaActual->id ? 'font-semibold text-indigo-700' : 'text-gray-700' }}">
+                                        {{ $l->id === $ligaActual->id ? '✓ ' : '' }}{{ $l->nombre }}
+                                    </button>
+                                </form>
+                            @endforeach
+                            <div class="border-t border-gray-100"></div>
+                            <x-dropdown-link :href="route('campeonatos.create')">+ Crear campeonato</x-dropdown-link>
+                        </x-slot>
+                    </x-dropdown>
+                @endif
+
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
@@ -156,6 +189,22 @@
 </x-responsive-nav-link>
 
         </div>
+
+        {{-- Campeonato actual y cambio entre los que participa --}}
+        @if ($ligaActual)
+            <div class="border-t border-gray-200 pt-3 pb-2">
+                <div class="px-4 text-xs uppercase tracking-wide text-gray-400">Campeonato</div>
+                @foreach ($misLigas as $l)
+                    <form method="POST" action="{{ route('campeonatos.usar', $l) }}">
+                        @csrf
+                        <button type="submit" class="block w-full border-l-4 py-2 pe-4 ps-3 text-start text-base {{ $l->id === $ligaActual->id ? 'border-indigo-400 bg-indigo-50 font-medium text-indigo-700' : 'border-transparent text-gray-600 hover:bg-gray-50' }}">
+                            🏆 {{ $l->nombre }}
+                        </button>
+                    </form>
+                @endforeach
+                <x-responsive-nav-link :href="route('campeonatos.create')">+ Crear campeonato</x-responsive-nav-link>
+            </div>
+        @endif
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">

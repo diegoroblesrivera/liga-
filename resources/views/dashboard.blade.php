@@ -22,16 +22,20 @@
             <div class="grid gap-6 sm:grid-cols-2">
 
                 {{-- Mis torneos --}}
-                <div class="flex flex-col bg-white p-6 shadow-sm sm:rounded-lg {{ $participa ? '' : 'opacity-75' }}">
+                <div class="flex flex-col bg-white p-6 shadow-sm sm:rounded-lg">
                     <div class="text-3xl">🏆</div>
                     <h3 class="mt-2 text-lg font-semibold text-gray-900">Mis torneos</h3>
 
                     @if ($participa)
                         <p class="mt-1 flex-1 text-sm text-gray-600">
+                            <span class="font-medium text-gray-800">{{ \App\Support\LigaActual::liga()?->nombre }}</span>.
                             @if ($miEquipo)
                                 Tu equipo: <span class="font-medium text-gray-800">{{ $miEquipo->nombre }}</span>.
                             @endif
                             Posiciones, partidos, goleadores y pagos del campeonato.
+                            @if (count($user->ligasIds()) > 1)
+                                <span class="text-gray-500">Cambia de campeonato desde el menú 🏆.</span>
+                            @endif
                         </p>
                         <div class="mt-4 flex flex-wrap items-center gap-3">
                             <a href="{{ route('tablas.posiciones') }}"
@@ -45,9 +49,15 @@
                         </div>
                     @else
                         <p class="mt-1 flex-1 text-sm text-gray-500">
-                            No participas en ningún torneo. Si juegas en un equipo del campeonato,
+                            No participas en ningún torneo. Crea el tuyo, o si juegas en un equipo,
                             pídele a tu DT el link de inscripción.
                         </p>
+                        <div class="mt-4">
+                            <a href="{{ route('campeonatos.create') }}"
+                               class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+                                Crear campeonato
+                            </a>
+                        </div>
                     @endif
                 </div>
 

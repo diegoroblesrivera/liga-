@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PerteneceALiga;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Equipo extends Model
 {
+    use PerteneceALiga;
+
     protected $table = 'equipos';
 
     protected $fillable = ['nombre', 'modalidad_id', 'escudo', 'foto', 'color_camiseta', 'activo'];

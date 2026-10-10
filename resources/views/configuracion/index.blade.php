@@ -4,9 +4,23 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-4xl space-y-4 sm:px-6 lg:px-8">
+
+            @if (session('status'))
+                <div class="rounded-md bg-green-50 p-4 text-sm text-green-700">{{ session('status') }}</div>
+            @endif
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                <a href="{{ route('campeonatos.edit') }}"
+                   class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-indigo-100 hover:shadow-md transition-shadow sm:col-span-2">
+                    <h3 class="text-sm font-semibold text-gray-900">🏆 Datos del campeonato</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        {{ \App\Support\LigaActual::liga()?->nombre }} ·
+                        {{ \App\Support\LigaActual::liga()?->publica ? 'Público: aparece en la portada' : 'Privado' }}.
+                        Cambia el nombre, la descripción y si es público.
+                    </p>
+                </a>
 
                 <a href="{{ route('jugadores.index') }}"
                    class="rounded-lg bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
