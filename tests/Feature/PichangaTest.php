@@ -49,6 +49,24 @@ class PichangaTest extends TestCase
         ])->assertSessionHasErrors('precio');
     }
 
+    public function test_el_valor_por_persona_se_redondea_hacia_arriba_a_multiplos_de_50(): void
+    {
+        $p = new Pichanga(['pago_modo' => 'completa']);
+
+        foreach ([
+            [27890, 10, 2800],  // 2.789 → 2.800
+            [27140, 10, 2750],  // 2.714 → 2.750
+            [27000, 10, 2700],  // exacto, no cambia
+            [27001, 10, 2750],  // 2.700,1 → 2.750
+            [2900, 3, 1000],    // 966,67 → 1.000
+        ] as [$total, $personas, $esperado]) {
+            $p->precio = $total;
+            $this->assertSame($esperado, $p->precioPorPersona($personas), "{$total} / {$personas}");
+        }
+
+        $this->assertNull($p->precioPorPersona(0));
+    }
+
     public function test_por_defecto_cupo_14_sin_rival_y_cancha_completa(): void
     {
         $user = User::factory()->create();

@@ -119,7 +119,8 @@ class Pichanga extends Model
         return $this->pago_modo === 'mitad' ? (int) ceil($this->precio / 2) : $this->precio;
     }
 
-    // Valor por persona según confirmados (redondeado hacia arriba).
+    // Valor por persona según confirmados, redondeado hacia arriba al múltiplo de 50
+    // para no cobrar montos raros (2.789 → 2.800, 2.714 → 2.750, 2.700 → 2.700).
     public function precioPorPersona(int $confirmados): ?int
     {
         $total = $this->totalAPagar();
@@ -128,6 +129,8 @@ class Pichanga extends Model
             return null;
         }
 
-        return (int) ceil($total / $confirmados);
+        $exacto = intdiv($total + $confirmados - 1, $confirmados); // división entera hacia arriba
+
+        return intdiv($exacto + 49, 50) * 50;
     }
 }
