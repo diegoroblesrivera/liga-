@@ -26,9 +26,10 @@ class PichangaPagoController extends Controller
         }
 
         $request->validate([
-            'comprobante' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'comprobante' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
         ], [
-            'comprobante.max' => 'La imagen no puede pesar más de 5 MB.',
+            'comprobante.max' => 'La imagen no puede pesar más de 10 MB.',
+            'comprobante.uploaded' => 'No se pudo subir la imagen. Si es una foto muy pesada, prueba con una captura de pantalla.',
         ]);
 
         $anterior = $asistencia->comprobante_path;
