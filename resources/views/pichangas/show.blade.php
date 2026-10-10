@@ -119,6 +119,11 @@
                             {{ $esOrganizador ? 'Equipos, pagos y resultado →' : 'Ver equipos →' }}
                         </a>
                         @if ($esOrganizador)
+                            <a href="{{ route('pichangas.fechas.show', $fecha) }}#lista-acceso" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+                                Lista de acceso →
+                            </a>
+                        @endif
+                        @if ($esOrganizador)
                             <form method="POST" action="{{ route('pichangas.fechas.estado', $fecha) }}" class="ms-auto flex gap-3">
                                 @csrf
                                 @if ($fecha->estaAbierta())

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Run;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -47,6 +48,36 @@ class PichangaFecha extends Model
     public function fechaLarga(): string
     {
         return $this->fecha->locale('es')->translatedFormat('l j \d\e F');
+    }
+
+    // Lista para la portería: confirmados en orden de llegada, con RUN, patente y acompañantes.
+    public function listaAcceso(): string
+    {
+        $confirmados = $this->confirmados()->with('user.acompanantes')->get();
+
+        return $confirmados->values()->map(function ($asistencia, $i) {
+            $user = $asistencia->user;
+
+            $lineas = [
+                ($i + 1).'.- '.$user->name,
+                'Run '.($user->run ? Run::formatear($user->run) : '(sin registrar)'),
+            ];
+
+            if ($user->patente) {
+                $lineas[] = 'Patente '.$user->patente;
+            }
+
+            if ($user->acompanantes->isNotEmpty()) {
+                $lineas[] = 'Acompañantes';
+
+                foreach ($user->acompanantes as $acompanante) {
+                    $lineas[] = $acompanante->nombre;
+                    $lineas[] = 'Run '.Run::formatear($acompanante->run);
+                }
+            }
+
+            return implode("\n", $lineas);
+        })->implode("\n");
     }
 
     // "Voy": entra como confirmado si hay cupo, si no a la lista de espera.

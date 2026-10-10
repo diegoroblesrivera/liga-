@@ -21,6 +21,8 @@ class User extends Authenticatable
         'email',
         'password',
         'equipo_id', // solo se usa cuando el usuario es DT
+        'run',       // datos para la portería (pichangas)
+        'patente',
     ];
 
     protected $hidden = [
@@ -67,6 +69,12 @@ class User extends Authenticatable
         return $this->belongsToMany(Pichanga::class, 'pichanga_user')
             ->withPivot('rol')
             ->withTimestamps();
+    }
+
+    // Personas que lo acompañan a las pichangas (para la lista de acceso)
+    public function acompanantes(): HasMany
+    {
+        return $this->hasMany(Acompanante::class)->orderBy('id');
     }
 
     // --- Helpers de rol ---

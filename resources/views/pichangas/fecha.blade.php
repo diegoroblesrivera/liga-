@@ -43,6 +43,38 @@
                 </div>
             </div>
 
+            {{-- Lista de acceso (solo organizador: contiene RUN) --}}
+            @if ($esOrganizador)
+                @php
+                    $sinRun = $confirmados->filter(fn ($a) => ! $a->user->run);
+                    $totalAcompanantes = $confirmados->sum(fn ($a) => $a->user->acompanantes->count());
+                @endphp
+                <div id="lista-acceso" class="bg-white p-6 shadow-sm sm:rounded-lg" x-data="{ copiado: false }">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-700">Lista de acceso</h3>
+                            <p class="text-xs text-gray-500">{{ $confirmados->count() }} {{ $confirmados->count() === 1 ? 'jugador' : 'jugadores' }} + {{ $totalAcompanantes }} {{ $totalAcompanantes === 1 ? 'acompañante' : 'acompañantes' }}</p>
+                        </div>
+                        <button type="button" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                                @click="navigator.clipboard.writeText($refs.lista.innerText); copiado = true; setTimeout(() => copiado = false, 2000)"
+                                x-text="copiado ? '¡Copiada!' : 'Copiar lista'">Copiar lista</button>
+                    </div>
+
+                    @if ($sinRun->isNotEmpty())
+                        <p class="mt-3 rounded-md bg-yellow-50 p-3 text-sm text-yellow-800">
+                            Sin RUN registrado: {{ $sinRun->map(fn ($a) => $a->user->name)->join(', ') }}.
+                            Pídeles que lo completen en su perfil.
+                        </p>
+                    @endif
+
+                    @if ($confirmados->isEmpty())
+                        <p class="mt-3 text-sm text-gray-400">No hay confirmados en esta fecha.</p>
+                    @else
+                        <pre x-ref="lista" class="mt-3 max-h-96 overflow-auto whitespace-pre-wrap rounded-md bg-gray-50 p-4 font-sans text-sm text-gray-800">{{ $fecha->listaAcceso() }}</pre>
+                    @endif
+                </div>
+            @endif
+
             {{-- Planilla del organizador --}}
             @if ($esOrganizador)
                 <div class="bg-white p-6 shadow-sm sm:rounded-lg">
