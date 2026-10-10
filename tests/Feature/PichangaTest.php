@@ -37,6 +37,17 @@ class PichangaTest extends TestCase
         $this->actingAs($user)->get(route('pichangas.show', $pichanga))->assertOk()->assertSee('Próxima fecha');
     }
 
+    public function test_el_precio_es_libre_pero_mayor_que_cero(): void
+    {
+        $pichanga = $this->crearPichanga(User::factory()->create(), ['precio' => 2900]);
+        $this->assertSame(2900, $pichanga->precio);
+
+        $this->actingAs(User::factory()->create())->post(route('pichangas.store'), [
+            'nombre' => 'Gratis', 'dia_semana' => 2, 'hora' => '21:00',
+            'duracion_min' => 60, 'cupo' => 10, 'precio' => 0,
+        ])->assertSessionHasErrors('precio');
+    }
+
     public function test_un_no_miembro_no_ve_la_pichanga_pero_puede_unirse_con_el_link(): void
     {
         $pichanga = $this->crearPichanga(User::factory()->create());

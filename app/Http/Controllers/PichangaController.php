@@ -156,7 +156,7 @@ class PichangaController extends Controller
             'hora' => ['required', 'date_format:H:i'],
             'duracion_min' => ['required', 'integer', 'min:30', 'max:240'],
             'cupo' => ['required', 'integer', 'min:2', 'max:50'],
-            'precio' => ['nullable', 'integer', 'min:0'],
+            'precio' => ['nullable', 'integer', 'min:1'],
         ]);
     }
 }

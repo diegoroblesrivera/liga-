@@ -52,7 +52,7 @@
 
     <div>
         <x-input-label for="precio" value="Valor total de la cancha (opcional)" />
-        <x-text-input id="precio" name="precio" type="number" min="0" step="500" class="mt-1 block w-full"
+        <x-text-input id="precio" name="precio" type="number" min="1" step="1" class="mt-1 block w-full"
                       :value="old('precio', $pichanga->precio ?? '')" />
         <p class="mt-1 text-xs text-gray-500">Se divide entre los confirmados.</p>
         <x-input-error :messages="$errors->get('precio')" class="mt-2" />
