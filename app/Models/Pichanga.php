@@ -20,13 +20,15 @@ class Pichanga extends Model
 
     protected $fillable = [
         'nombre', 'descripcion', 'lugar', 'dia_semana', 'hora', 'duracion_min',
-        'cupo', 'precio', 'organizador_id', 'token', 'activa',
+        'cupo', 'tiene_rival', 'rival_nombre', 'precio', 'pago_modo',
+        'organizador_id', 'token', 'activa',
     ];
 
     protected $casts = [
         'dia_semana' => 'integer',
         'duracion_min' => 'integer',
         'cupo' => 'integer',
+        'tiene_rival' => 'boolean',
         'precio' => 'integer',
         'activa' => 'boolean',
     ];
@@ -101,13 +103,31 @@ class Pichanga extends Model
         ]);
     }
 
-    // Valor por persona según confirmados (redondeado hacia arriba).
-    public function precioPorPersona(int $confirmados): ?int
+    // Nombre del rival para mostrar ("Rival" si no se indicó).
+    public function nombreRival(): string
     {
-        if (! $this->precio || $confirmados === 0) {
+        return $this->rival_nombre ?: 'Rival';
+    }
+
+    // Lo que paga el grupo: la cancha completa o la mitad (la otra mitad la paga el rival).
+    public function totalAPagar(): ?int
+    {
+        if (! $this->precio) {
             return null;
         }
 
-        return (int) ceil($this->precio / $confirmados);
+        return $this->pago_modo === 'mitad' ? (int) ceil($this->precio / 2) : $this->precio;
+    }
+
+    // Valor por persona según confirmados (redondeado hacia arriba).
+    public function precioPorPersona(int $confirmados): ?int
+    {
+        $total = $this->totalAPagar();
+
+        if (! $total || $confirmados === 0) {
+            return null;
+        }
+
+        return (int) ceil($total / $confirmados);
     }
 }

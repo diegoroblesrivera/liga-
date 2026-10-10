@@ -148,7 +148,7 @@ class PichangaController extends Controller
 
     protected function validar(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'nombre' => ['required', 'string', 'max:120'],
             'descripcion' => ['nullable', 'string', 'max:255'],
             'lugar' => ['nullable', 'string', 'max:200'],
@@ -156,7 +156,19 @@ class PichangaController extends Controller
             'hora' => ['required', 'date_format:H:i'],
             'duracion_min' => ['required', 'integer', 'min:30', 'max:240'],
             'cupo' => ['required', 'integer', 'min:2', 'max:50'],
+            'tiene_rival' => ['boolean'],
+            'rival_nombre' => ['nullable', 'string', 'max:120'],
             'precio' => ['nullable', 'integer', 'min:1'],
+            'pago_modo' => ['required', Rule::in(['completa', 'mitad'])],
         ]);
+
+        $data['tiene_rival'] = $request->boolean('tiene_rival');
+
+        // Sin rival no se guarda nombre.
+        if (! $data['tiene_rival']) {
+            $data['rival_nombre'] = null;
+        }
+
+        return $data;
     }
 }

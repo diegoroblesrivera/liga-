@@ -11,6 +11,10 @@
         $equipoA = $confirmados->where('equipo', 'A');
         $equipoB = $confirmados->where('equipo', 'B');
         $porPersona = $pichanga->precioPorPersona($confirmados->count());
+        // Con rival juegan todos juntos contra otro grupo: no hay equipos A/B.
+        $rival = $pichanga->tiene_rival;
+        $ladoA = $rival ? 'Nosotros' : 'Equipo A';
+        $ladoB = $rival ? $pichanga->nombreRival() : 'Equipo B';
     @endphp
 
     <div class="py-8">
@@ -21,26 +25,39 @@
             {{-- Marcador y equipos --}}
             <div class="bg-white p-6 shadow-sm sm:rounded-lg">
                 <div class="flex items-center justify-center gap-6 text-center">
-                    <div class="w-24 text-sm font-semibold text-blue-700">Equipo A</div>
+                    <div class="w-28 text-sm font-semibold text-blue-700">{{ $ladoA }}</div>
                     <div class="text-3xl font-bold text-gray-900">{{ $fecha->goles_a ?? '-' }} – {{ $fecha->goles_b ?? '-' }}</div>
-                    <div class="w-24 text-sm font-semibold text-orange-700">Equipo B</div>
+                    <div class="w-28 text-sm font-semibold text-orange-700">{{ $ladoB }}</div>
                 </div>
                 <p class="mt-1 text-center text-xs uppercase tracking-wide text-gray-400">{{ $fecha->estado }}</p>
 
-                <div class="mt-6 grid grid-cols-2 gap-6 text-sm">
-                    @foreach (['A' => $equipoA, 'B' => $equipoB] as $letra => $equipo)
-                        <ul class="space-y-1">
-                            @forelse ($equipo as $a)
-                                <li class="flex justify-between {{ $letra === 'B' ? 'flex-row-reverse text-right' : '' }}">
-                                    <span>{{ $a->user->name }}</span>
-                                    @if ($a->goles) <span class="text-gray-500">⚽ {{ $a->goles }}</span> @endif
-                                </li>
-                            @empty
-                                <li class="text-gray-400">Sin jugadores asignados</li>
-                            @endforelse
-                        </ul>
-                    @endforeach
-                </div>
+                @if ($rival)
+                    <ul class="mx-auto mt-6 max-w-xs space-y-1 text-sm">
+                        @forelse ($confirmados as $a)
+                            <li class="flex justify-between">
+                                <span>{{ $a->user->name }}</span>
+                                @if ($a->goles) <span class="text-gray-500">⚽ {{ $a->goles }}</span> @endif
+                            </li>
+                        @empty
+                            <li class="text-center text-gray-400">Sin confirmados</li>
+                        @endforelse
+                    </ul>
+                @else
+                    <div class="mt-6 grid grid-cols-2 gap-6 text-sm">
+                        @foreach (['A' => $equipoA, 'B' => $equipoB] as $letra => $equipo)
+                            <ul class="space-y-1">
+                                @forelse ($equipo as $a)
+                                    <li class="flex justify-between {{ $letra === 'B' ? 'flex-row-reverse text-right' : '' }}">
+                                        <span>{{ $a->user->name }}</span>
+                                        @if ($a->goles) <span class="text-gray-500">⚽ {{ $a->goles }}</span> @endif
+                                    </li>
+                                @empty
+                                    <li class="text-gray-400">Sin jugadores asignados</li>
+                                @endforelse
+                            </ul>
+                        @endforeach
+                    </div>
+                @endif
             </div>
 
             {{-- Lista de acceso (solo organizador: contiene RUN) --}}
@@ -80,18 +97,21 @@
                 <div class="bg-white p-6 shadow-sm sm:rounded-lg">
                     <div class="flex items-center justify-between">
                         <h3 class="text-sm font-semibold text-gray-700">Planilla</h3>
-                        <form method="POST" action="{{ route('pichangas.fechas.sortear', $fecha) }}"
-                              onsubmit="return confirm('Esto reemplaza los equipos actuales. ¿Sortear?')">
-                            @csrf
-                            <button type="submit" class="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
-                                🎲 Sortear equipos
-                            </button>
-                        </form>
+                        @unless ($rival)
+                            <form method="POST" action="{{ route('pichangas.fechas.sortear', $fecha) }}"
+                                  onsubmit="return confirm('Esto reemplaza los equipos actuales. ¿Sortear?')">
+                                @csrf
+                                <button type="submit" class="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
+                                    🎲 Sortear equipos
+                                </button>
+                            </form>
+                        @endunless
                     </div>
 
                     @if ($porPersona)
                         <p class="mt-1 text-sm text-gray-500">
-                            ${{ number_format($porPersona, 0, ',', '.') }} por persona ·
+                            Total ${{ number_format($pichanga->totalAPagar(), 0, ',', '.') }}{{ $pichanga->pago_modo === 'mitad' ? ' (mitad de la cancha)' : '' }}
+                            ÷ {{ $confirmados->count() }} = <strong>${{ number_format($porPersona, 0, ',', '.') }} por persona</strong> ·
                             pagaron {{ $confirmados->where('pagado', true)->count() }} de {{ $confirmados->count() }}
                         </p>
                     @endif
@@ -105,7 +125,7 @@
                                 <thead class="text-left text-xs uppercase text-gray-400">
                                     <tr>
                                         <th class="py-2">Jugador</th>
-                                        <th class="py-2">Equipo</th>
+                                        @unless ($rival)<th class="py-2">Equipo</th>@endunless
                                         <th class="py-2 text-center">Pagó</th>
                                         <th class="py-2 text-right">Goles</th>
                                     </tr>
@@ -114,14 +134,16 @@
                                     @forelse ($confirmados as $a)
                                         <tr class="border-t border-gray-100">
                                             <td class="py-2 pe-2">{{ $a->user->name }}</td>
-                                            <td class="py-2 pe-2">
-                                                <select name="jugadores[{{ $a->id }}][equipo]"
-                                                        class="rounded-md border-gray-300 py-1 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                                    <option value="">—</option>
-                                                    <option value="A" @selected($a->equipo === 'A')>A</option>
-                                                    <option value="B" @selected($a->equipo === 'B')>B</option>
-                                                </select>
-                                            </td>
+                                            @unless ($rival)
+                                                <td class="py-2 pe-2">
+                                                    <select name="jugadores[{{ $a->id }}][equipo]"
+                                                            class="rounded-md border-gray-300 py-1 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                        <option value="">—</option>
+                                                        <option value="A" @selected($a->equipo === 'A')>A</option>
+                                                        <option value="B" @selected($a->equipo === 'B')>B</option>
+                                                    </select>
+                                                </td>
+                                            @endunless
                                             <td class="py-2 text-center">
                                                 <input type="checkbox" name="jugadores[{{ $a->id }}][pagado]" value="1" @checked($a->pagado)
                                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
@@ -140,11 +162,11 @@
 
                         <div class="mt-6 flex flex-wrap items-end gap-4 border-t border-gray-100 pt-4">
                             <div>
-                                <x-input-label for="goles_a" value="Goles A" />
+                                <x-input-label for="goles_a" :value="'Goles '.$ladoA" />
                                 <x-text-input id="goles_a" name="goles_a" type="number" min="0" max="99" class="mt-1 w-20" :value="old('goles_a', $fecha->goles_a)" />
                             </div>
                             <div>
-                                <x-input-label for="goles_b" value="Goles B" />
+                                <x-input-label for="goles_b" :value="'Goles '.$ladoB" />
                                 <x-text-input id="goles_b" name="goles_b" type="number" min="0" max="99" class="mt-1 w-20" :value="old('goles_b', $fecha->goles_b)" />
                             </div>
                             @if ($fecha->estado !== 'jugada')

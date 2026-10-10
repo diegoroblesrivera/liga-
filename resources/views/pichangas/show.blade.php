@@ -2,7 +2,12 @@
     <x-slot name="header">
         <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-                <h2 class="text-xl font-semibold leading-tight text-gray-800">{{ $pichanga->nombre }}</h2>
+                <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                    {{ $pichanga->nombre }}
+                    @if ($pichanga->tiene_rival)
+                        <span class="font-normal text-gray-500">vs {{ $pichanga->nombreRival() }}</span>
+                    @endif
+                </h2>
                 <p class="text-sm text-gray-500">
                     {{ $pichanga->nombreDia() }} {{ $pichanga->horaCorta() }} · {{ $pichanga->duracion_min }} min
                     @if ($pichanga->lugar) · {{ $pichanga->lugar }} @endif
@@ -42,6 +47,7 @@
                                 </span>
                                 @if ($porPersona)
                                     · ${{ number_format($porPersona, 0, ',', '.') }} c/u
+                                    <span class="text-gray-400">(total ${{ number_format($pichanga->totalAPagar(), 0, ',', '.') }}{{ $pichanga->pago_modo === 'mitad' ? ', mitad de la cancha' : '' }})</span>
                                 @endif
                             </div>
                             @unless ($fecha->estaAbierta())
@@ -191,7 +197,9 @@
                             <span class="text-xs text-yellow-600">Sin resultado</span>
                         @else
                             <span class="font-semibold text-gray-900">
-                                <span class="text-blue-700">A</span> {{ $h->goles_a ?? '-' }} – {{ $h->goles_b ?? '-' }} <span class="text-orange-700">B</span>
+                                <span class="text-blue-700">{{ $pichanga->tiene_rival ? 'Nosotros' : 'A' }}</span>
+                                {{ $h->goles_a ?? '-' }} – {{ $h->goles_b ?? '-' }}
+                                <span class="text-orange-700">{{ $pichanga->tiene_rival ? $pichanga->nombreRival() : 'B' }}</span>
                             </span>
                         @endif
                     </a>

@@ -22,6 +22,7 @@ class PichangaTest extends TestCase
             'duracion_min' => 60,
             'cupo' => 2,
             'precio' => 30000,
+            'pago_modo' => 'completa',
         ])->assertRedirect();
 
         return Pichanga::latest('id')->firstOrFail();
@@ -46,6 +47,55 @@ class PichangaTest extends TestCase
             'nombre' => 'Gratis', 'dia_semana' => 2, 'hora' => '21:00',
             'duracion_min' => 60, 'cupo' => 10, 'precio' => 0,
         ])->assertSessionHasErrors('precio');
+    }
+
+    public function test_por_defecto_cupo_14_sin_rival_y_cancha_completa(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get(route('pichangas.create'))
+            ->assertOk()
+            ->assertSee('value="14"', false)
+            ->assertSee('Existe equipo rival');
+    }
+
+    public function test_con_rival_paga_la_mitad_y_se_divide_entre_confirmados(): void
+    {
+        $org = User::factory()->create();
+        $pichanga = $this->crearPichanga($org, [
+            'cupo' => 14,
+            'precio' => 29000,
+            'tiene_rival' => '1',
+            'rival_nombre' => 'Los del jueves',
+            'pago_modo' => 'mitad',
+        ]);
+
+        $this->assertTrue($pichanga->tiene_rival);
+        $this->assertSame('Los del jueves', $pichanga->nombreRival());
+        $this->assertSame(14500, $pichanga->totalAPagar());
+        $this->assertSame(1450, $pichanga->precioPorPersona(10));
+
+        $fecha = $pichanga->proximaFecha();
+        $fecha->anotar($org);
+
+        $this->actingAs($org)->get(route('pichangas.show', $pichanga))->assertOk()->assertSee('vs Los del jueves');
+        $this->actingAs($org)->get(route('pichangas.fechas.show', $fecha))
+            ->assertOk()
+            ->assertSee('Nosotros')
+            ->assertSee('Goles Los del jueves')
+            ->assertDontSee('Sortear equipos');
+
+        // Al quitar el rival se borra el nombre y vuelve a la cancha completa
+        $this->actingAs($org)->put(route('pichangas.update', $pichanga), [
+            'nombre' => 'Pichanga martes', 'dia_semana' => 2, 'hora' => '21:00', 'duracion_min' => 60,
+            'cupo' => 14, 'precio' => 29000, 'tiene_rival' => '0', 'rival_nombre' => 'Los del jueves',
+            'pago_modo' => 'completa', 'activa' => '1',
+        ])->assertSessionHasNoErrors();
+
+        $pichanga->refresh();
+        $this->assertFalse($pichanga->tiene_rival);
+        $this->assertNull($pichanga->rival_nombre);
+        $this->assertSame(29000, $pichanga->totalAPagar());
     }
 
     public function test_un_no_miembro_no_ve_la_pichanga_pero_puede_unirse_con_el_link(): void

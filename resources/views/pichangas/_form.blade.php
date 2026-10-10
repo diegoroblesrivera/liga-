@@ -41,21 +41,72 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+<div>
+    <x-input-label for="cupo" value="Cupo de jugadores" />
+    <x-text-input id="cupo" name="cupo" type="number" min="2" max="50" class="mt-1 block w-full sm:w-40"
+                  :value="old('cupo', $pichanga->cupo ?? 14)" required />
+    <p class="mt-1 text-xs text-gray-500">Los que se anoten después quedan en lista de espera.</p>
+    <x-input-error :messages="$errors->get('cupo')" class="mt-2" />
+</div>
+
+<div class="space-y-4 rounded-md border border-gray-200 p-4"
+     x-data="{
+        rival: @js((bool) old('tiene_rival', $pichanga->tiene_rival ?? false)),
+        modo: @js(old('pago_modo', $pichanga->pago_modo ?? 'completa')),
+        precio: @js((string) old('precio', $pichanga->precio ?? '')),
+        get total() {
+            const p = parseInt(this.precio, 10);
+            if (!p || p < 1) return null;
+            return this.modo === 'mitad' ? Math.ceil(p / 2) : p;
+        },
+        pesos(n) { return '$' + n.toLocaleString('es-CL'); },
+     }">
+
+    {{-- Equipo rival --}}
     <div>
-        <x-input-label for="cupo" value="Cupo de jugadores" />
-        <x-text-input id="cupo" name="cupo" type="number" min="2" max="50" class="mt-1 block w-full"
-                      :value="old('cupo', $pichanga->cupo ?? 14)" required />
-        <p class="mt-1 text-xs text-gray-500">Los que se anoten después quedan en lista de espera.</p>
-        <x-input-error :messages="$errors->get('cupo')" class="mt-2" />
+        <input type="hidden" name="tiene_rival" value="0">
+        <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <input type="checkbox" name="tiene_rival" value="1" x-model="rival"
+                   @change="if (rival) modo = 'mitad'"
+                   class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+            Existe equipo rival
+        </label>
+        <p class="mt-1 text-xs text-gray-500">Márcalo si juegan contra otro grupo en vez de armar dos equipos entre ustedes.</p>
+
+        <div x-show="rival" x-cloak class="mt-3">
+            <x-input-label for="rival_nombre" value="Nombre del rival (opcional)" />
+            <x-text-input id="rival_nombre" name="rival_nombre" type="text" maxlength="120" class="mt-1 block w-full"
+                          placeholder="Los del jueves" :value="old('rival_nombre', $pichanga->rival_nombre ?? '')" />
+            <x-input-error :messages="$errors->get('rival_nombre')" class="mt-2" />
+        </div>
     </div>
 
-    <div>
-        <x-input-label for="precio" value="Valor total de la cancha (opcional)" />
-        <x-text-input id="precio" name="precio" type="number" min="1" step="1" class="mt-1 block w-full"
-                      :value="old('precio', $pichanga->precio ?? '')" />
-        <p class="mt-1 text-xs text-gray-500">Se divide entre los confirmados.</p>
+    {{-- Pago --}}
+    <div class="border-t border-gray-100 pt-4">
+        <x-input-label for="precio" value="Valor de la cancha completa (opcional)" />
+        <x-text-input id="precio" name="precio" type="number" min="1" step="1" class="mt-1 block w-full sm:w-48"
+                      x-model="precio" :value="old('precio', $pichanga->precio ?? '')" />
         <x-input-error :messages="$errors->get('precio')" class="mt-2" />
+
+        <div class="mt-3 space-y-2">
+            <span class="block text-sm font-medium text-gray-700">El grupo paga</span>
+            <label class="flex items-center gap-2 text-sm text-gray-700">
+                <input type="radio" name="pago_modo" value="completa" x-model="modo"
+                       class="border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                La cancha completa
+            </label>
+            <label class="flex items-center gap-2 text-sm text-gray-700">
+                <input type="radio" name="pago_modo" value="mitad" x-model="modo"
+                       class="border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                La mitad de la cancha <span class="text-gray-400">(la otra mitad la paga el rival)</span>
+            </label>
+            <x-input-error :messages="$errors->get('pago_modo')" class="mt-2" />
+        </div>
+
+        <p class="mt-3 rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-700" x-show="total">
+            Total a pagar: <strong x-text="total ? pesos(total) : ''"></strong>,
+            dividido entre los confirmados de cada fecha.
+        </p>
     </div>
 </div>
 
