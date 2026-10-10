@@ -24,11 +24,12 @@ use App\Http\Controllers\PichangaFechaController;
 use App\Http\Controllers\PichangaPagoController;
 
 
+// Registro por invitación a un equipo (público)
 Route::get('/invitacion/{token}', [InscripcionController::class, 'show'])->name('invitacion.show');
 Route::post('/invitacion/{token}', [InscripcionController::class, 'store'])->name('invitacion.store');
 
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/',[HomeController::class, 'index'])->name('home');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -39,7 +40,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::put('/profile/acceso', [ProfileController::class, 'updateAcceso'])->name('profile.acceso.update');
-    //rutas Custom
+});
+
+// Campeonato: solo quienes participan en algún torneo (admin, DT, jugador o árbitro).
+Route::middleware(['auth', 'torneos'])->group(function () {
     // Equipos
     Route::get('/equipos', [EquipoController::class, 'index'])->name('equipos.index');
     Route::get('/equipos/crear', [EquipoController::class, 'create'])->name('equipos.create');
@@ -127,8 +131,10 @@ Route::get('/jugadores/{jugador}/editar', [JugadorController::class, 'edit'])->n
 Route::put('/jugadores/{jugador}', [JugadorController::class, 'update'])->name('jugadores.update');
 Route::delete('/jugadores/{jugador}', [JugadorController::class, 'destroy'])->name('jugadores.destroy');
 Route::post('/equipos/{equipo}/unirme', [JugadorController::class, 'unirme'])->name('jugadores.unirme');
+});
 
-    // Pichangas semanales (cualquier usuario puede crear la suya)
+// Pichangas semanales: cualquier usuario logueado, no requiere ser parte del campeonato.
+Route::middleware('auth')->group(function () {
     Route::get('/pichangas', [PichangaController::class, 'index'])->name('pichangas.index');
     Route::get('/pichangas/crear', [PichangaController::class, 'create'])->name('pichangas.create');
     Route::post('/pichangas', [PichangaController::class, 'store'])->name('pichangas.store');
@@ -147,16 +153,6 @@ Route::post('/equipos/{equipo}/unirme', [JugadorController::class, 'unirme'])->n
     Route::post('/pichangas/fechas/{fecha}/estado', [PichangaFechaController::class, 'estado'])->name('pichangas.fechas.estado');
     Route::post('/pichangas/fechas/{fecha}/comprobante', [PichangaPagoController::class, 'store'])->name('pichangas.comprobante.store');
     Route::get('/pichangas/asistencias/{asistencia}/comprobante', [PichangaPagoController::class, 'show'])->name('pichangas.comprobante.show');
-});
-
-// Registro por invitación (público)
-Route::get('/invitacion/{token}', [InscripcionController::class, 'show'])->name('invitacion.show');
-Route::post('/invitacion/{token}', [InscripcionController::class, 'store'])->name('invitacion.store');
-
-// Gestión de invitaciones (autenticado)
-Route::middleware('auth')->group(function () {
-    Route::post('/equipos/{equipo}/invitaciones', [InvitacionController::class, 'store'])->name('invitaciones.store');
-    Route::delete('/invitaciones/{invitacion}', [InvitacionController::class, 'destroy'])->name('invitaciones.destroy');
 });
 
 require __DIR__.'/auth.php';

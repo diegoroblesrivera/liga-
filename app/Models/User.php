@@ -79,6 +79,13 @@ class User extends Authenticatable
 
     // --- Helpers de rol ---
 
+    // ¿Participa en el campeonato? Cualquier rol de liga (admin, DT, jugador, árbitro) o super admin.
+    // Quien solo juega pichangas no tiene roles.
+    public function participaEnTorneos(): bool
+    {
+        return (bool) $this->is_super_admin || $this->roles->isNotEmpty();
+    }
+
     public function hasRole(string $rol): bool
     {
         return $this->roles->contains('nombre', $rol);

@@ -13,13 +13,13 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                        Inicio
                     </x-nav-link>
+
+                    {{-- Campeonato: solo para quien participa en un torneo --}}
+                    @if (auth()->user()?->participaEnTorneos())
                     <x-nav-link :href="route('equipos.index')" :active="request()->routeIs('equipos.*')">
                         {{ __('Equipos') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('pichangas.index')" :active="request()->routeIs('pichangas.*')">
-                        {{ __('Pichangas') }}
                     </x-nav-link>
                     <x-nav-link :href="route('tablas.posiciones')" :active="request()->routeIs('tablas.posiciones')">
                         {{ __('Posiciones') }}
@@ -31,7 +31,7 @@
                     <x-nav-link :href="route('arbitros.index')" :active="request()->routeIs('arbitros.*')">
                         {{ __('Árbitros') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('fixtures.create')" :active="request()->routeIs('arbitros.*')">
+                    <x-nav-link :href="route('fixtures.create')" :active="request()->routeIs('fixtures.*')">
                         {{ __('Fixture') }}
                     </x-nav-link>
                     <x-nav-link :href="route('configuracion.index')" :active="request()->routeIs('configuracion.*', 'jugadores.index')">
@@ -39,7 +39,7 @@
                     </x-nav-link>
 
                     @endif
-                    <x-nav-link :href="route('partidos.index')" :active="request()->routeIs('arbitros.*')">
+                    <x-nav-link :href="route('partidos.index')" :active="request()->routeIs('partidos.*')">
                         {{ __('Partidos') }}
                     </x-nav-link>
 
@@ -52,6 +52,11 @@
                             {{ __('Pagos') }}
                         </x-nav-link>
                     @endif
+                    @endif
+
+                    <x-nav-link :href="route('pichangas.index')" :active="request()->routeIs('pichangas.*')">
+                        {{ __('Pichangas') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -105,14 +110,13 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+                Inicio
             </x-responsive-nav-link>
+
+{{-- Campeonato: solo para quien participa en un torneo --}}
+@if (auth()->user()?->participaEnTorneos())
             <x-responsive-nav-link :href="route('equipos.index')" :active="request()->routeIs('equipos.*')">
     {{ __('Equipos') }}
-</x-responsive-nav-link>
-
-<x-responsive-nav-link :href="route('pichangas.index')" :active="request()->routeIs('pichangas.*')">
-    {{ __('Pichangas') }}
 </x-responsive-nav-link>
 
 <x-responsive-nav-link :href="route('partidos.index')" :active="request()->routeIs('partidos.*')">
@@ -145,7 +149,11 @@
         {{ __('Pagos') }}
     </x-responsive-nav-link>
 @endif
+@endif
 
+<x-responsive-nav-link :href="route('pichangas.index')" :active="request()->routeIs('pichangas.*')">
+    {{ __('Pichangas') }}
+</x-responsive-nav-link>
 
         </div>
 
