@@ -193,6 +193,18 @@ class PichangaTest extends TestCase
         $this->actingAs($b)->get(route('pichangas.fechas.show', $fecha))->assertOk()->assertDontSee('Guardar planilla');
     }
 
+    public function test_a_las_22_hora_chile_la_fecha_de_hoy_sigue_siendo_la_proxima(): void
+    {
+        // Martes 13-10-2026 a las 22:30 en Chile (ya es miércoles en UTC).
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-10-13 22:30', 'America/Santiago'));
+
+        $pichanga = $this->crearPichanga(User::factory()->create()); // martes 21:00
+        $hoy = $pichanga->proximaFecha();
+
+        $this->assertSame('2026-10-13', $hoy->fecha->toDateString());
+        $this->assertTrue($pichanga->proximaFecha()->is($hoy));
+    }
+
     public function test_inscripciones_cerradas_no_permiten_anotarse(): void
     {
         $org = User::factory()->create();
