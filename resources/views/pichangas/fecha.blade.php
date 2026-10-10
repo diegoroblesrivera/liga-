@@ -30,7 +30,7 @@
             <div class="bg-white p-6 shadow-sm sm:rounded-lg">
                 <div class="flex items-center justify-center gap-6 text-center">
                     <div class="w-28 text-sm font-semibold text-blue-700">{{ $ladoA }}</div>
-                    <div class="text-3xl font-bold text-gray-900">{{ $fecha->goles_a ?? '-' }} – {{ $fecha->goles_b ?? '-' }}</div>
+                    <div class="marcador text-6xl text-balon">{{ $fecha->goles_a ?? '-' }} – {{ $fecha->goles_b ?? '-' }}</div>
                     <div class="w-28 text-sm font-semibold text-orange-700">{{ $ladoB }}</div>
                 </div>
                 <p class="mt-1 text-center text-xs uppercase tracking-wide text-gray-400">{{ $fecha->estado }}</p>

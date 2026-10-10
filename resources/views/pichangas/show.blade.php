@@ -204,7 +204,7 @@
                         @else
                             <span class="font-semibold text-gray-900">
                                 <span class="text-blue-700">{{ $pichanga->tiene_rival ? 'Nosotros' : 'A' }}</span>
-                                {{ $h->goles_a ?? '-' }} – {{ $h->goles_b ?? '-' }}
+                                <span class="marcador text-xl">{{ $h->goles_a ?? '-' }} – {{ $h->goles_b ?? '-' }}</span>
                                 <span class="text-orange-700">{{ $pichanga->tiene_rival ? $pichanga->nombreRival() : 'B' }}</span>
                             </span>
                         @endif

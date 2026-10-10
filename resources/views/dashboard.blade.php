@@ -22,9 +22,9 @@
             <div class="grid gap-6 sm:grid-cols-2">
 
                 {{-- Mis torneos --}}
-                <div class="flex flex-col bg-white p-6 shadow-sm sm:rounded-lg">
+                <div class="flex flex-col border-t-4 border-cancha-400 bg-white p-6 shadow-sm sm:rounded-lg">
                     <div class="text-3xl">🏆</div>
-                    <h3 class="mt-2 text-lg font-semibold text-gray-900">Mis torneos</h3>
+                    <h3 class="titulo-deportivo mt-2 text-xl text-balon">Mis torneos</h3>
 
                     @if ($participa)
                         <p class="mt-1 flex-1 text-sm text-gray-600">
@@ -62,9 +62,9 @@
                 </div>
 
                 {{-- Mis pichangas --}}
-                <div class="flex flex-col bg-white p-6 shadow-sm sm:rounded-lg">
+                <div class="flex flex-col border-t-4 border-cancha-400 bg-white p-6 shadow-sm sm:rounded-lg">
                     <div class="text-3xl">⚽</div>
-                    <h3 class="mt-2 text-lg font-semibold text-gray-900">Mis pichangas</h3>
+                    <h3 class="titulo-deportivo mt-2 text-xl text-balon">Mis pichangas</h3>
 
                     @if ($misPichangas->isNotEmpty())
                         <ul class="mt-2 flex-1 space-y-1 text-sm text-gray-600">

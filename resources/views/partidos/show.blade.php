@@ -138,7 +138,7 @@
                     @if ($partido->estaProgramado())
                         <span class="text-2xl text-gray-400">vs</span>
                     @else
-                        <span class="text-3xl font-semibold text-gray-900">{{ $golesLocal }} - {{ $golesVisita }}</span>
+                        <span class="marcador text-6xl text-balon">{{ $golesLocal }} - {{ $golesVisita }}</span>
                     @endif
                     <span class="text-lg font-medium text-gray-900">{{ $partido->equipoVisita->nombre }}</span>
                 </div>

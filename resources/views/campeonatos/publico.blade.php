@@ -33,7 +33,7 @@
 
     <div class="mb-6">
         <a href="{{ route('home') }}" class="text-sm text-gray-500 hover:text-gray-700">← Todos los campeonatos</a>
-        <h1 class="mt-1 text-2xl font-bold text-gray-900">🏆 {{ $liga->nombre }}</h1>
+        <h1 class="titulo-deportivo mt-1 text-3xl text-balon">🏆 {{ $liga->nombre }}</h1>
         @if ($liga->descripcion)
             <p class="mt-1 text-gray-600">{{ $liga->descripcion }}</p>
         @endif
@@ -133,7 +133,7 @@
                                                     <div class="flex items-center justify-between">
                                                         <span class="font-medium text-gray-900">{{ $partido->equipoLocal->nombre }}</span>
                                                         @if ($partido->estado === 'finalizado')
-                                                            <span class="font-semibold text-gray-900">{{ $partido->goles_local }} - {{ $partido->goles_visita }}</span>
+                                                            <span class="marcador text-2xl text-balon">{{ $partido->goles_local }} - {{ $partido->goles_visita }}</span>
                                                         @else
                                                             <span class="text-xs text-gray-400">vs</span>
                                                         @endif
@@ -165,7 +165,7 @@
                                     {{ $g->jugador }}
                                     <span class="text-gray-400">· {{ $g->equipo }}</span>
                                 </span>
-                                <span class="font-semibold text-gray-900">{{ $g->goles }}</span>
+                                <span class="marcador text-2xl text-cancha-600">{{ $g->goles }}</span>
                             </div>
                         @empty
                             <p class="px-5 py-4 text-sm text-gray-500">Todavía no hay goles registrados.</p>

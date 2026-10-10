@@ -57,7 +57,7 @@
                                                 <div class="flex items-center justify-between">
                                                     <span class="font-medium text-gray-900">{{ $partido->equipoLocal->nombre }}</span>
                                                     @if ($partido->estaFinalizado())
-                                                        <span class="font-semibold text-gray-900">{{ $partido->goles_local }} - {{ $partido->goles_visita }}</span>
+                                                        <span class="marcador text-2xl text-balon">{{ $partido->goles_local }} - {{ $partido->goles_visita }}</span>
                                                     @else
                                                         <span class="text-xs text-gray-400">vs</span>
                                                     @endif

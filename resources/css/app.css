@@ -4,3 +4,33 @@
 
 /* Alpine: oculta elementos x-show hasta que Alpine arranca */
 [x-cloak] { display: none !important; }
+
+@layer components {
+    /* Franjas de césped cortado (portada, login, borde bajo el menú) */
+    .franjas-cesped {
+        background: linear-gradient(90deg, #5B9452 50%, #376F32 50%);
+        background-size: 120px 100%;
+    }
+
+    /* Títulos con estilo de marca deportiva: Kanit itálica 900 */
+    .titulo-deportivo {
+        @apply font-titulo uppercase italic tracking-wide;
+        font-weight: 900;
+    }
+
+    /* Números de estadio: resultados, puntos, goles */
+    .marcador {
+        @apply font-marcador leading-none tracking-wide;
+        font-weight: 700;
+    }
+
+    /* Título de cada página (slot "header" del layout) */
+    .encabezado-pagina h2 {
+        @apply titulo-deportivo text-balon;
+    }
+
+    /* Puntos en las tablas de posiciones */
+    .tp .pts {
+        @apply marcador text-lg;
+    }
+}
