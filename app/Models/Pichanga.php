@@ -19,7 +19,7 @@ class Pichanga extends Model
 
     protected $fillable = [
         'nombre', 'descripcion', 'lugar', 'dia_semana', 'hora', 'duracion_min',
-        'cupo', 'tiene_rival', 'rival_nombre', 'precio', 'pago_modo',
+        'cupo', 'tiene_rival', 'rival_nombre', 'precio', 'pago_modo', 'datos_transferencia',
         'organizador_id', 'token', 'activa',
     ];
 

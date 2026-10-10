@@ -160,6 +160,7 @@ class PichangaController extends Controller
             'rival_nombre' => ['nullable', 'string', 'max:120'],
             'precio' => ['nullable', 'integer', 'min:1'],
             'pago_modo' => ['required', Rule::in(['completa', 'mitad'])],
+            'datos_transferencia' => ['nullable', 'string', 'max:500'],
         ]);
 
         $data['tiene_rival'] = $request->boolean('tiene_rival');

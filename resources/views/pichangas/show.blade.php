@@ -87,6 +87,12 @@
                         </p>
                     @endif
 
+                    @if ($porPersona && $miEstado === 'confirmado')
+                        <div class="mt-4">
+                            @include('pichangas._mi-pago')
+                        </div>
+                    @endif
+
                     <div class="mt-6 grid gap-6 sm:grid-cols-2">
                         <div>
                             <h3 class="text-sm font-semibold text-gray-700">Confirmados</h3>

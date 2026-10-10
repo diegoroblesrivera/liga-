@@ -11,10 +11,12 @@ class PichangaAsistencia extends Model
 
     protected $fillable = [
         'pichanga_fecha_id', 'user_id', 'estado', 'anotado_en', 'equipo', 'pagado', 'goles',
+        'comprobante_path', 'comprobante_subido_en',
     ];
 
     protected $casts = [
         'anotado_en' => 'datetime',
+        'comprobante_subido_en' => 'datetime',
         'pagado' => 'boolean',
         'goles' => 'integer',
     ];

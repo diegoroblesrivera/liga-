@@ -15,12 +15,16 @@
         $rival = $pichanga->tiene_rival;
         $ladoA = $rival ? 'Nosotros' : 'Equipo A';
         $ladoB = $rival ? $pichanga->nombreRival() : 'Equipo B';
+        $miAsistencia = $fecha->asistencias->firstWhere('user_id', auth()->id());
     @endphp
 
     <div class="py-8">
         <div class="mx-auto max-w-3xl space-y-6 sm:px-6 lg:px-8">
 
             @include('pichangas._alertas')
+
+            {{-- Mi pago (cualquier confirmado, también en fechas ya jugadas) --}}
+            @include('pichangas._mi-pago')
 
             {{-- Marcador y equipos --}}
             <div class="bg-white p-6 shadow-sm sm:rounded-lg">
@@ -127,6 +131,7 @@
                                         <th class="py-2">Jugador</th>
                                         @unless ($rival)<th class="py-2">Equipo</th>@endunless
                                         <th class="py-2 text-center">Pagó</th>
+                                        <th class="py-2 text-center">Comprobante</th>
                                         <th class="py-2 text-right">Goles</th>
                                     </tr>
                                 </thead>
@@ -146,7 +151,17 @@
                                             @endunless
                                             <td class="py-2 text-center">
                                                 <input type="checkbox" name="jugadores[{{ $a->id }}][pagado]" value="1" @checked($a->pagado)
+                                                       title="Marca a mano los pagos presenciales"
                                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                            </td>
+                                            <td class="py-2 text-center">
+                                                @if ($a->comprobante_path)
+                                                    <a href="{{ route('pichangas.comprobante.show', $a) }}" target="_blank"
+                                                       title="Subido el {{ $a->comprobante_subido_en->format('d/m H:i') }}"
+                                                       class="text-xs font-medium text-indigo-600 hover:text-indigo-800">Ver</a>
+                                                @else
+                                                    <span class="text-xs text-gray-300">—</span>
+                                                @endif
                                             </td>
                                             <td class="py-2 text-right">
                                                 <input type="number" min="0" max="50" name="jugadores[{{ $a->id }}][goles]" value="{{ $a->goles }}"
@@ -154,7 +169,7 @@
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="4" class="py-4 text-center text-gray-400">No hay confirmados en esta fecha.</td></tr>
+                                        <tr><td colspan="5" class="py-4 text-center text-gray-400">No hay confirmados en esta fecha.</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>

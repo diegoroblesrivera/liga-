@@ -107,6 +107,15 @@
             Total a pagar: <strong x-text="total ? pesos(total) : ''"></strong>,
             dividido entre los confirmados de cada fecha.
         </p>
+
+        <div class="mt-4">
+            <x-input-label for="datos_transferencia" value="Datos para transferir (opcional)" />
+            <textarea id="datos_transferencia" name="datos_transferencia" rows="4" maxlength="500"
+                      placeholder="Nombre&#10;RUT&#10;Banco y tipo de cuenta&#10;N° de cuenta&#10;Correo"
+                      class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('datos_transferencia', $pichanga->datos_transferencia ?? '') }}</textarea>
+            <p class="mt-1 text-xs text-gray-500">Los confirmados los ven junto a su monto para transferir y subir el comprobante.</p>
+            <x-input-error :messages="$errors->get('datos_transferencia')" class="mt-2" />
+        </div>
     </div>
 </div>
 

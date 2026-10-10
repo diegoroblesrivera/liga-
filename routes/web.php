@@ -21,6 +21,7 @@ use App\Http\Controllers\CanchaController;
 use App\Http\Controllers\TorneoController;
 use App\Http\Controllers\PichangaController;
 use App\Http\Controllers\PichangaFechaController;
+use App\Http\Controllers\PichangaPagoController;
 
 
 Route::get('/invitacion/{token}', [InscripcionController::class, 'show'])->name('invitacion.show');
@@ -144,6 +145,8 @@ Route::post('/equipos/{equipo}/unirme', [JugadorController::class, 'unirme'])->n
     Route::post('/pichangas/fechas/{fecha}/sortear', [PichangaFechaController::class, 'sortear'])->name('pichangas.fechas.sortear');
     Route::put('/pichangas/fechas/{fecha}/planilla', [PichangaFechaController::class, 'planilla'])->name('pichangas.fechas.planilla');
     Route::post('/pichangas/fechas/{fecha}/estado', [PichangaFechaController::class, 'estado'])->name('pichangas.fechas.estado');
+    Route::post('/pichangas/fechas/{fecha}/comprobante', [PichangaPagoController::class, 'store'])->name('pichangas.comprobante.store');
+    Route::get('/pichangas/asistencias/{asistencia}/comprobante', [PichangaPagoController::class, 'show'])->name('pichangas.comprobante.show');
 });
 
 // Registro por invitación (público)
