@@ -29,6 +29,11 @@
         font-weight: 700;
     }
 
+    /* Texto directo sobre el video de la portada: sombra para que se lea en cualquier cuadro */
+    .texto-sobre-video {
+        text-shadow: 0 2px 12px rgba(0, 0, 0, .65);
+    }
+
     /* Título de cada página (slot "header" del layout) */
     .encabezado-pagina h2 {
         @apply titulo-deportivo text-balon;

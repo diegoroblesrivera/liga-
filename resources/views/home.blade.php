@@ -8,10 +8,10 @@
                poster="{{ asset('videos/portada.jpg') }}">
             <source src="{{ asset('videos/portada.mp4') }}" type="video/mp4">
         </video>
-        <div class="absolute inset-0 bg-balon/50"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-balon/50 via-balon/55 to-balon/75"></div>
 
-        <div class="relative px-4 py-10 sm:px-10 sm:py-16">
-        <div class="mx-auto max-w-3xl rounded-2xl border-4 border-white bg-balon/85 px-6 py-10 text-center shadow-xl backdrop-blur-sm sm:px-12">
+        <div class="relative px-4 py-12 sm:px-10 sm:py-20">
+        <div class="texto-sobre-video mx-auto max-w-3xl px-2 text-center sm:px-6">
             <h1 class="titulo-deportivo text-3xl text-white sm:text-5xl">Tu fútbol, organizado</h1>
             <p class="marcador mt-3 text-4xl text-cancha-400 sm:text-5xl">Pichangas · Campeonatos</p>
             <p class="mx-auto mt-5 max-w-2xl text-gray-200">
