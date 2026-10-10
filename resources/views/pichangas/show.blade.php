@@ -31,7 +31,12 @@
                     $confirmados = $fecha->asistencias->where('estado', 'confirmado')->sortBy('anotado_en');
                     $espera = $fecha->asistencias->where('estado', 'espera')->sortBy('anotado_en');
                     $bajas = $fecha->asistencias->where('estado', 'baja');
+                    // El valor se divide entre todos los que juegan (con invitados);
+                    // el cupo solo lo ocupan los jugadores con cuenta.
                     $porPersona = $pichanga->precioPorPersona($confirmados->count());
+                    $conCuenta = $confirmados->whereNull('invitado_por')->count();
+                    $invitados = $confirmados->whereNotNull('invitado_por')->count();
+                    $misInvitados = $confirmados->where('invitado_por', auth()->id());
                     $miEstado = $miAsistencia?->estado;
                 @endphp
 
@@ -42,9 +47,12 @@
                             <div class="mt-1 text-lg font-semibold capitalize text-gray-900">{{ $fecha->fechaLarga() }}</div>
                             <div class="text-sm text-gray-500">
                                 {{ substr($fecha->hora, 0, 5) }} hrs ·
-                                <span class="font-medium {{ $confirmados->count() >= $pichanga->cupo ? 'text-red-600' : 'text-gray-700' }}">
-                                    {{ $confirmados->count() }}/{{ $pichanga->cupo }} confirmados
+                                <span class="font-medium {{ $conCuenta >= $pichanga->cupo ? 'text-red-600' : 'text-gray-700' }}">
+                                    {{ $conCuenta }}/{{ $pichanga->cupo }} confirmados
                                 </span>
+                                @if ($invitados)
+                                    <span class="text-gray-500">+ {{ $invitados }} {{ $invitados === 1 ? 'invitado' : 'invitados' }}</span>
+                                @endif
                                 @if ($porPersona)
                                     · ${{ number_format($porPersona, 0, ',', '.') }} c/u
                                     <span class="text-gray-400">(total ${{ number_format($pichanga->totalAPagar(), 0, ',', '.') }}{{ $pichanga->pago_modo === 'mitad' ? ', mitad de la cancha' : '' }})</span>
@@ -87,6 +95,37 @@
                         </p>
                     @endif
 
+                    {{-- Llevar invitados sin cuenta (no ocupan cupo) --}}
+                    @if ($miEstado === 'confirmado' && $fecha->estaAbierta())
+                        <div class="mt-4 rounded-md border border-gray-200 p-4" x-data="{ abierto: false }">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="text-sm text-gray-700">
+                                    @if ($misInvitados->isNotEmpty())
+                                        Llevas {{ $misInvitados->count() }} {{ $misInvitados->count() === 1 ? 'invitado' : 'invitados' }}.
+                                    @else
+                                        ¿Llevas a alguien que no tiene cuenta?
+                                    @endif
+                                </span>
+                                @if ($misInvitados->count() < \App\Models\PichangaFecha::MAX_INVITADOS_POR_JUGADOR)
+                                    <button type="button" @click="abierto = !abierto"
+                                            class="text-sm font-medium text-indigo-600 hover:text-indigo-800">+ Llevar un invitado</button>
+                                @endif
+                            </div>
+                            <form x-show="abierto" x-cloak method="POST" action="{{ route('pichangas.invitados.store', $fecha) }}"
+                                  class="mt-3 grid gap-2 sm:grid-cols-[1fr_10rem_auto]">
+                                @csrf
+                                <input type="text" name="invitado_nombre" maxlength="120" placeholder="Nombre (opcional)"
+                                       class="rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="text" name="invitado_run" placeholder="RUN (opcional)"
+                                       class="rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <x-primary-button class="justify-center">Agregar</x-primary-button>
+                                <p class="text-xs text-gray-500 sm:col-span-3">
+                                    No ocupa cupo, pero juega y entra en la división del valor de la cancha. El RUN sirve para la lista de la portería.
+                                </p>
+                            </form>
+                        </div>
+                    @endif
+
                     @if ($porPersona && $miEstado === 'confirmado')
                         <div class="mt-4">
                             @include('pichangas._mi-pago')
@@ -100,9 +139,17 @@
                                 @forelse ($confirmados->values() as $i => $a)
                                     <li class="flex items-center gap-2">
                                         <span class="w-5 text-right text-xs text-gray-400">{{ $i + 1 }}.</span>
-                                        {{ $a->user->name }}
+                                        <span class="{{ $a->esInvitado() ? 'text-gray-600' : '' }}">{{ $a->nombreVisible() }}</span>
                                         @if ($a->equipo)
                                             <span class="rounded px-1.5 text-xs font-semibold {{ $a->equipo === 'A' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700' }}">{{ $a->equipo }}</span>
+                                        @endif
+                                        @if ($a->esInvitado() && ($a->invitado_por === auth()->id() || $esOrganizador))
+                                            <form method="POST" action="{{ route('pichangas.invitados.destroy', $a) }}" class="ms-auto"
+                                                  onsubmit="return confirm('¿Quitar a este invitado?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-xs text-red-600 hover:text-red-800">Quitar</button>
+                                            </form>
                                         @endif
                                     </li>
                                 @empty
@@ -114,14 +161,14 @@
                             <h3 class="text-sm font-semibold text-gray-700">Lista de espera</h3>
                             <ol class="mt-2 space-y-1 text-sm text-gray-800">
                                 @forelse ($espera->values() as $i => $a)
-                                    <li><span class="text-xs text-gray-400">{{ $i + 1 }}.</span> {{ $a->user->name }}</li>
+                                    <li><span class="text-xs text-gray-400">{{ $i + 1 }}.</span> {{ $a->nombreVisible() }}</li>
                                 @empty
                                     <li class="text-gray-400">Vacía</li>
                                 @endforelse
                             </ol>
                             @if ($bajas->isNotEmpty())
                                 <h3 class="mt-4 text-sm font-semibold text-gray-700">No van</h3>
-                                <p class="mt-1 text-sm text-gray-500">{{ $bajas->map(fn ($a) => $a->user->name)->join(', ') }}</p>
+                                <p class="mt-1 text-sm text-gray-500">{{ $bajas->map(fn ($a) => $a->nombreVisible())->join(', ') }}</p>
                             @endif
                         </div>
                     </div>

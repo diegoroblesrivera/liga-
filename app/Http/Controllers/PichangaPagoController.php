@@ -9,11 +9,14 @@ use Illuminate\Support\Facades\Storage;
 
 class PichangaPagoController extends Controller
 {
-    // El jugador confirmado sube su comprobante de transferencia: queda pagado.
+    // El jugador confirmado sube su comprobante de transferencia: queda pagado, y también
+    // quienes marque en "Pago también por" (sus invitados u otros que aún no pagan).
     public function store(Request $request, PichangaFecha $fecha)
     {
+        $user = $request->user();
+
         $asistencia = $fecha->asistencias()
-            ->where('user_id', $request->user()->id)
+            ->where('user_id', $user->id)
             ->where('estado', 'confirmado')
             ->first();
 
@@ -25,38 +28,61 @@ class PichangaPagoController extends Controller
             return back()->withErrors(['comprobante' => 'Esta fecha fue cancelada.']);
         }
 
-        $request->validate([
+        $data = $request->validate([
             'comprobante' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'pago_por' => ['array'],
+            'pago_por.*' => ['integer'],
         ], [
             'comprobante.max' => 'La imagen no puede pesar más de 10 MB.',
             'comprobante.uploaded' => 'No se pudo subir la imagen. Si es una foto muy pesada, prueba con una captura de pantalla.',
         ]);
 
-        $anterior = $asistencia->comprobante_path;
+        // Por quiénes más puede pagar: sus propios invitados, o confirmados con cuenta que
+        // aún no pagan. Cualquier otro ID enviado se ignora.
+        $otros = $fecha->confirmados()
+            ->whereIn('id', $data['pago_por'] ?? [])
+            ->whereKeyNot($asistencia->id)
+            ->where(fn ($q) => $q->where('invitado_por', $user->id)
+                ->orWhere(fn ($q) => $q->whereNull('invitado_por')->where('pagado', false)))
+            ->get();
+
+        $cubiertos = collect([$asistencia])->concat($otros);
+        $anteriores = $cubiertos->pluck('comprobante_path')->filter()->unique();
 
         // Nombre aleatorio y fuera de public/: no se puede adivinar ni abrir sin permiso.
         $ruta = $request->file('comprobante')->store('comprobantes-pichangas/'.$fecha->id, 'local');
 
-        $asistencia->update([
-            'comprobante_path' => $ruta,
-            'comprobante_subido_en' => now(),
-            'pagado' => true,
-        ]);
-
-        if ($anterior) {
-            Storage::disk('local')->delete($anterior);
+        foreach ($cubiertos as $a) {
+            $a->update([
+                'comprobante_path' => $ruta,
+                'comprobante_subido_en' => now(),
+                'pagado' => true,
+                'pagado_por' => $a->is($asistencia) ? null : $user->id,
+            ]);
         }
 
-        return back()->with('status', '¡Comprobante subido! Quedaste como pagado.');
+        // Un comprobante anterior se borra solo si ya nadie lo usa.
+        foreach ($anteriores as $anterior) {
+            if (! PichangaAsistencia::where('comprobante_path', $anterior)->exists()) {
+                Storage::disk('local')->delete($anterior);
+            }
+        }
+
+        $mensaje = $otros->isEmpty()
+            ? '¡Comprobante subido! Quedaste como pagado.'
+            : '¡Comprobante subido! Quedaron pagados tú y '.$otros->count().' '.($otros->count() === 1 ? 'persona más' : 'personas más').'.';
+
+        return back()->with('status', $mensaje);
     }
 
-    // Ver el comprobante: solo quien lo subió o el organizador.
+    // Ver el comprobante: el jugador, quien pagó por él, quien lo invitó, o el organizador.
     public function show(Request $request, PichangaAsistencia $asistencia)
     {
         $user = $request->user();
 
         abort_unless(
-            $asistencia->user_id === $user->id || $asistencia->fecha->pichanga->esOrganizador($user),
+            in_array($user->id, [$asistencia->user_id, $asistencia->pagado_por, $asistencia->invitado_por], true)
+                || $asistencia->fecha->pichanga->esOrganizador($user),
             403
         );
 

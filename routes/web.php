@@ -22,6 +22,7 @@ use App\Http\Controllers\TorneoController;
 use App\Http\Controllers\PichangaController;
 use App\Http\Controllers\PichangaFechaController;
 use App\Http\Controllers\PichangaPagoController;
+use App\Http\Controllers\PichangaInvitadoController;
 use App\Http\Controllers\CampeonatoController;
 use App\Http\Controllers\CampeonatoPublicoController;
 
@@ -161,6 +162,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/pichangas/fechas/{fecha}/planilla', [PichangaFechaController::class, 'planilla'])->name('pichangas.fechas.planilla');
     Route::post('/pichangas/fechas/{fecha}/estado', [PichangaFechaController::class, 'estado'])->name('pichangas.fechas.estado');
     Route::post('/pichangas/fechas/{fecha}/comprobante', [PichangaPagoController::class, 'store'])->name('pichangas.comprobante.store');
+    Route::post('/pichangas/fechas/{fecha}/invitados', [PichangaInvitadoController::class, 'store'])->name('pichangas.invitados.store');
+    Route::delete('/pichangas/invitados/{asistencia}', [PichangaInvitadoController::class, 'destroy'])->name('pichangas.invitados.destroy');
     Route::get('/pichangas/asistencias/{asistencia}/comprobante', [PichangaPagoController::class, 'show'])->name('pichangas.comprobante.show');
 });
 

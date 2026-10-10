@@ -40,6 +40,32 @@ class PichangaFecha extends Model
         return $this->asistencias()->where('estado', 'espera')->orderBy('anotado_en');
     }
 
+    // Confirmados con cuenta: son los que ocupan cupo (los invitados van aparte).
+    public function cuposOcupados(): int
+    {
+        return $this->confirmados()->whereNull('invitado_por')->count();
+    }
+
+    public const MAX_INVITADOS_POR_JUGADOR = 5;
+
+    // Un jugador confirmado suma a alguien sin cuenta. No ocupa cupo, pero sí juega y paga.
+    public function agregarInvitado(User $anfitrion, ?string $nombre, ?string $run): PichangaAsistencia
+    {
+        return $this->asistencias()->create([
+            'user_id' => null,
+            'invitado_por' => $anfitrion->id,
+            'invitado_nombre' => $nombre ?: null,
+            'invitado_run' => $run,
+            'estado' => 'confirmado',
+            'anotado_en' => now(),
+        ]);
+    }
+
+    public function invitadosDe(User $anfitrion): HasMany
+    {
+        return $this->asistencias()->where('invitado_por', $anfitrion->id);
+    }
+
     public function estaAbierta(): bool
     {
         return $this->estado === 'abierta';
@@ -50,24 +76,26 @@ class PichangaFecha extends Model
         return $this->fecha->locale('es')->translatedFormat('l j \d\e F');
     }
 
-    // Lista para la portería: confirmados en orden de llegada, con RUN, patente y acompañantes.
+    // Lista para la portería: confirmados (e invitados) en orden de llegada, con RUN,
+    // patente y acompañantes.
     public function listaAcceso(): string
     {
-        $confirmados = $this->confirmados()->with('user.acompanantes')->get();
+        $confirmados = $this->confirmados()->with(['user.acompanantes', 'invitadoPor'])->get();
 
         return $confirmados->values()->map(function ($asistencia, $i) {
             $user = $asistencia->user;
+            $run = $asistencia->run();
 
             $lineas = [
-                ($i + 1).'.- '.$user->name,
-                'Run '.($user->run ? Run::formatear($user->run) : '(sin registrar)'),
+                ($i + 1).'.- '.$asistencia->nombreVisible(),
+                'Run '.($run ? Run::formatear($run) : '(sin registrar)'),
             ];
 
-            if ($user->patente) {
+            if ($user?->patente) {
                 $lineas[] = 'Patente '.$user->patente;
             }
 
-            if ($user->acompanantes->isNotEmpty()) {
+            if ($user && $user->acompanantes->isNotEmpty()) {
                 $lineas[] = 'Acompañantes';
 
                 foreach ($user->acompanantes as $acompanante) {
@@ -93,7 +121,7 @@ class PichangaFecha extends Model
                 return $asistencia;
             }
 
-            $hayCupo = $this->confirmados()->count() < $this->pichanga->cupo;
+            $hayCupo = $this->cuposOcupados() < $this->pichanga->cupo;
 
             $asistencia->fill([
                 'estado' => $hayCupo ? 'confirmado' : 'espera',
@@ -104,11 +132,14 @@ class PichangaFecha extends Model
         });
     }
 
-    // "No voy": se baja y, si liberó un cupo, sube el primero de la lista de espera.
+    // "No voy": se baja (junto con sus invitados, que iban con él) y, si liberó un cupo,
+    // sube el primero de la lista de espera.
     public function bajar(User $user): void
     {
         DB::transaction(function () use ($user) {
             self::whereKey($this->id)->lockForUpdate()->first();
+
+            $this->invitadosDe($user)->delete();
 
             $asistencia = $this->asistencias()->firstOrNew(['user_id' => $user->id]);
             $liberaCupo = $asistencia->estado === 'confirmado';

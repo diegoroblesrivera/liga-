@@ -39,7 +39,7 @@
                     <ul class="mx-auto mt-6 max-w-xs space-y-1 text-sm">
                         @forelse ($confirmados as $a)
                             <li class="flex justify-between">
-                                <span>{{ $a->user->name }}</span>
+                                <span>{{ $a->nombreVisible() }}</span>
                                 @if ($a->goles) <span class="text-gray-500">⚽ {{ $a->goles }}</span> @endif
                             </li>
                         @empty
@@ -52,7 +52,7 @@
                             <ul class="space-y-1">
                                 @forelse ($equipo as $a)
                                     <li class="flex justify-between {{ $letra === 'B' ? 'flex-row-reverse text-right' : '' }}">
-                                        <span>{{ $a->user->name }}</span>
+                                        <span>{{ $a->nombreVisible() }}</span>
                                         @if ($a->goles) <span class="text-gray-500">⚽ {{ $a->goles }}</span> @endif
                                     </li>
                                 @empty
@@ -67,8 +67,8 @@
             {{-- Lista de acceso (solo organizador: contiene RUN) --}}
             @if ($esOrganizador)
                 @php
-                    $sinRun = $confirmados->filter(fn ($a) => ! $a->user->run);
-                    $totalAcompanantes = $confirmados->sum(fn ($a) => $a->user->acompanantes->count());
+                    $sinRun = $confirmados->filter(fn ($a) => ! $a->run());
+                    $totalAcompanantes = $confirmados->sum(fn ($a) => $a->user?->acompanantes->count() ?? 0);
                 @endphp
                 <div id="lista-acceso" class="bg-white p-6 shadow-sm sm:rounded-lg" x-data="{ copiado: false }">
                     <div class="flex flex-wrap items-center justify-between gap-2">
@@ -83,7 +83,7 @@
 
                     @if ($sinRun->isNotEmpty())
                         <p class="mt-3 rounded-md bg-yellow-50 p-3 text-sm text-yellow-800">
-                            Sin RUN registrado: {{ $sinRun->map(fn ($a) => $a->user->name)->join(', ') }}.
+                            Sin RUN registrado: {{ $sinRun->map(fn ($a) => $a->nombreVisible())->join(', ') }}.
                             Pídeles que lo completen en su perfil.
                         </p>
                     @endif
@@ -138,7 +138,7 @@
                                 <tbody>
                                     @forelse ($confirmados as $a)
                                         <tr class="border-t border-gray-100">
-                                            <td class="py-2 pe-2">{{ $a->user->name }}</td>
+                                            <td class="py-2 pe-2">{{ $a->nombreVisible() }}@if ($a->pagadoPor) <span class="block text-xs text-gray-400">pagó {{ $a->pagadoPor->name }}</span>@endif</td>
                                             @unless ($rival)
                                                 <td class="py-2 pe-2">
                                                     <select name="jugadores[{{ $a->id }}][equipo]"

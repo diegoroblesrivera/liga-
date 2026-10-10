@@ -15,7 +15,11 @@ class PichangaFechaController extends Controller
         abort_unless($pichanga->esMiembro($request->user()), 403);
 
         $esOrganizador = $pichanga->esOrganizador($request->user());
-        $fecha->load($esOrganizador ? 'asistencias.user.acompanantes' : 'asistencias.user');
+        $fecha->load([
+            $esOrganizador ? 'asistencias.user.acompanantes' : 'asistencias.user',
+            'asistencias.invitadoPor',
+            'asistencias.pagadoPor',
+        ]);
 
         return view('pichangas.fecha', compact('pichanga', 'fecha', 'esOrganizador'));
     }

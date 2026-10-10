@@ -56,7 +56,7 @@ class PichangaController extends Controller
         abort_unless($pichanga->esMiembro($user), 403);
 
         $fecha = $pichanga->activa ? $pichanga->proximaFecha() : null;
-        $fecha?->load('asistencias.user');
+        $fecha?->load(['asistencias.user', 'asistencias.invitadoPor', 'asistencias.pagadoPor']);
 
         $miAsistencia = $fecha?->asistencias->firstWhere('user_id', $user->id);
 
@@ -73,6 +73,7 @@ class PichangaController extends Controller
             ->where('pichanga_fechas.pichanga_id', $pichanga->id)
             ->where('pichanga_fechas.estado', 'jugada')
             ->where('pichanga_asistencias.estado', 'confirmado')
+            ->whereNotNull('pichanga_asistencias.user_id') // los invitados no suman al ranking
             ->groupBy('pichanga_asistencias.user_id')
             ->select('pichanga_asistencias.user_id')
             ->selectRaw('COUNT(*) AS partidos, SUM(pichanga_asistencias.goles) AS goles')
