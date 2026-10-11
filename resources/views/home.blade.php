@@ -63,7 +63,7 @@
     </section>
 
     {{-- Campeonatos públicos --}}
-    <section class="mt-12">
+    <section id="campeonatos" class="mt-12 scroll-mt-6">
         <h2 class="titulo-deportivo text-2xl text-balon">Campeonatos</h2>
         <p class="mt-1 text-sm text-gray-500">Sigue la tabla, las fechas y los goleadores de los campeonatos abiertos al público.</p>
 

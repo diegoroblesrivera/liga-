@@ -7,7 +7,7 @@
     @include('layouts._fuentes')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-gray-100 font-sans text-gray-900 antialiased">
+<body class="flex min-h-screen flex-col bg-gray-100 font-sans text-gray-900 antialiased">
     <header class="bg-balon">
         <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
             <a href="{{ url('/') }}" class="titulo-deportivo text-xl text-white">
@@ -28,8 +28,10 @@
         <div class="franjas-cesped h-1.5"></div>
     </header>
 
-    <main class="mx-auto max-w-6xl px-4 py-8">
+    <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         {{ $slot }}
     </main>
+
+    <x-footer-cancha />
 </body>
 </html>
