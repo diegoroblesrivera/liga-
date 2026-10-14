@@ -14,13 +14,13 @@ class GoogleLoginTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function simularGoogle(string $email, string $id = 'g-123', bool $verificado = true): void
+    protected function simularGoogle(string $email, string $id = 'g-123', bool $verificado = true, string $avatar = 'https://example.com/a.jpg'): void
     {
         $google = (new GoogleUser)->setRaw(['email_verified' => $verificado])->map([
             'id' => $id,
             'name' => 'Juan Pérez',
             'email' => $email,
-            'avatar' => 'https://example.com/a.jpg',
+            'avatar' => $avatar,
         ]);
 
         $provider = Mockery::mock(\Laravel\Socialite\Contracts\Provider::class);
@@ -58,6 +58,25 @@ class GoogleLoginTest extends TestCase
         $this->assertSame('g-123', $existente->fresh()->google_id);
         $this->assertNotNull($existente->fresh()->password); // conserva su contraseña
         $this->assertSame(1, User::count());
+    }
+
+    // Caso real (14-10-2026): Google entregó una URL de foto de 1.130 caracteres y el
+    // login daba error 500, tanto al crear la cuenta como al vincular una existente.
+    public function test_acepta_url_de_avatar_muy_larga_al_crear_y_al_vincular(): void
+    {
+        $avatarLargo = 'https://lh3.googleusercontent.com/a-/'.str_repeat('AbC123xYz_', 110);
+        $this->assertGreaterThan(1100, strlen($avatarLargo));
+
+        $this->simularGoogle('nuevo@gmail.com', 'g-largo-1', avatar: $avatarLargo);
+        $this->get('/auth/google/callback')->assertRedirect('/dashboard');
+        $this->assertSame($avatarLargo, User::where('email', 'nuevo@gmail.com')->value('avatar'));
+
+        auth()->logout();
+        $existente = User::factory()->create(['email' => 'existente@gmail.com']);
+        $this->simularGoogle('existente@gmail.com', 'g-largo-2', avatar: $avatarLargo);
+        $this->get('/auth/google/callback')->assertRedirect('/dashboard');
+        $this->assertAuthenticatedAs($existente);
+        $this->assertSame('g-largo-2', $existente->fresh()->google_id);
     }
 
     public function test_rechaza_correo_no_verificado(): void
