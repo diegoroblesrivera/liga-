@@ -62,21 +62,30 @@ class GoogleLoginTest extends TestCase
 
     // Caso real (14-10-2026): Google entregó una URL de foto de 1.130 caracteres y el
     // login daba error 500, tanto al crear la cuenta como al vincular una existente.
-    public function test_acepta_url_de_avatar_muy_larga_al_crear_y_al_vincular(): void
+    protected function avatarLargo(): string
     {
-        $avatarLargo = 'https://lh3.googleusercontent.com/a-/'.str_repeat('AbC123xYz_', 110);
-        $this->assertGreaterThan(1100, strlen($avatarLargo));
+        return 'https://lh3.googleusercontent.com/a-/'.str_repeat('AbC123xYz_', 110); // ~1.140 caracteres
+    }
 
-        $this->simularGoogle('nuevo@gmail.com', 'g-largo-1', avatar: $avatarLargo);
+    public function test_acepta_url_de_avatar_muy_larga_al_crear_la_cuenta(): void
+    {
+        $this->simularGoogle('nuevo@gmail.com', 'g-largo-1', avatar: $this->avatarLargo());
+
         $this->get('/auth/google/callback')->assertRedirect('/dashboard');
-        $this->assertSame($avatarLargo, User::where('email', 'nuevo@gmail.com')->value('avatar'));
 
-        auth()->logout();
+        $this->assertSame($this->avatarLargo(), User::where('email', 'nuevo@gmail.com')->value('avatar'));
+    }
+
+    public function test_acepta_url_de_avatar_muy_larga_al_vincular_una_cuenta_existente(): void
+    {
         $existente = User::factory()->create(['email' => 'existente@gmail.com']);
-        $this->simularGoogle('existente@gmail.com', 'g-largo-2', avatar: $avatarLargo);
+        $this->simularGoogle('existente@gmail.com', 'g-largo-2', avatar: $this->avatarLargo());
+
         $this->get('/auth/google/callback')->assertRedirect('/dashboard');
+
         $this->assertAuthenticatedAs($existente);
         $this->assertSame('g-largo-2', $existente->fresh()->google_id);
+        $this->assertSame($this->avatarLargo(), $existente->fresh()->avatar);
     }
 
     public function test_rechaza_correo_no_verificado(): void
