@@ -71,6 +71,9 @@ Route::middleware(['auth', 'torneos'])->group(function () {
     Route::get('/partidos/{partido}', [PartidoController::class, 'show'])->name('partidos.show');
     Route::get('/partidos/{partido}/editar', [PartidoController::class, 'edit'])->name('partidos.edit');
     Route::put('/partidos/{partido}', [PartidoController::class, 'update'])->name('partidos.update');
+    Route::delete('/partidos/{partido}', [PartidoController::class, 'destroy'])->name('partidos.destroy');
+    Route::delete('/torneos/{torneo}/fechas/{numero}', [PartidoController::class, 'destroyFecha'])
+        ->whereNumber('numero')->name('partidos.fechas.destroy');
     Route::post('/partidos/{partido}/programacion', [PartidoController::class, 'actualizarProgramacion'])->name('partidos.actualizarProgramacion');
     Route::get('/equipos/{equipo}/alineacion', [App\Http\Controllers\AlineacionController::class, 'equipo'])->name('equipos.alineacion');
     // Partidos: acciones del árbitro y asignación

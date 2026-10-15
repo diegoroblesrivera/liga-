@@ -5,12 +5,34 @@
                 {{ $partido->equipoLocal->nombre }} vs {{ $partido->equipoVisita->nombre }}
             </h2>
 
-            @can('update', $partido)
-                <a href="{{ route('partidos.edit', $partido) }}"
-                   class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    Reprogramar
-                </a>
-            @endcan
+            <div class="flex items-center gap-3">
+                @can('update', $partido)
+                    <a href="{{ route('partidos.edit', $partido) }}"
+                       class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Reprogramar
+                    </a>
+                @endcan
+                @can('delete', $partido)
+                    @php
+                        $perdidas = collect([
+                            $partido->estaFinalizado() ? 'su resultado (cambia la tabla de posiciones)' : null,
+                            $partido->goles->isNotEmpty() ? $partido->goles->count().' goles (cambian los goleadores)' : null,
+                            $partido->pagos->isNotEmpty() ? $partido->pagos->count().' pagos con sus comprobantes' : null,
+                        ])->filter();
+                        $aviso = '¿Eliminar este partido?'
+                            .($perdidas->isNotEmpty() ? ' Se borrarán también '.$perdidas->join(', ', ' y ').'.' : '')
+                            .' No se puede deshacer.';
+                    @endphp
+                    <form method="POST" action="{{ route('partidos.destroy', $partido) }}"
+                          data-confirm="{{ $aviso }}" onsubmit="return confirm(this.dataset.confirm)">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="rounded-md border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50">
+                            Eliminar
+                        </button>
+                    </form>
+                @endcan
+            </div>
         </div>
     </x-slot>
 

@@ -8,6 +8,8 @@ use App\Models\Partido;
 use App\Models\Torneo;
 use App\Support\LigaActual;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class PartidoController extends Controller
 {
@@ -124,6 +126,35 @@ class PartidoController extends Controller
         return back()->with('status', 'Árbitro actualizado.');
     }
 
+    // Eliminar un partido (solo admin). Goles, tarjetas, convocatorias y pagos se borran
+    // en cascada en la base; las imágenes de los comprobantes se borran aquí.
+    public function destroy(Partido $partido)
+    {
+        $this->authorize('delete', $partido);
+
+        $nombre = $partido->equipoLocal->nombre.' vs '.$partido->equipoVisita->nombre;
+
+        DB::transaction(fn () => $partido->delete());
+        $this->borrarComprobantes([$partido->id]);
+
+        return redirect()->route('partidos.index')->with('status', "Partido eliminado: {$nombre}.");
+    }
+
+    // Eliminar una fecha (jornada) completa de un torneo (solo admin).
+    public function destroyFecha(Request $request, Torneo $torneo, int $numero)
+    {
+        abort_unless($request->user()->hasRole('admin'), 403);
+
+        $partidos = $torneo->partidos()->where('numero_fecha', $numero)->get();
+        abort_if($partidos->isEmpty(), 404);
+
+        DB::transaction(fn () => $torneo->partidos()->where('numero_fecha', $numero)->delete());
+        $this->borrarComprobantes($partidos->pluck('id')->all());
+
+        return redirect()->route('partidos.index')
+            ->with('status', "Fecha {$numero} de \"{$torneo->nombre}\" eliminada ({$partidos->count()} ".($partidos->count() === 1 ? 'partido' : 'partidos').').');
+    }
+
     // --- Acciones del árbitro (ciclo de vida) ---
 
     public function iniciar(Partido $partido)
@@ -154,6 +185,14 @@ class PartidoController extends Controller
     }
 
     // --- Helpers ---
+
+    // Los comprobantes de pago de cada partido viven en public/uploads/comprobantes/{partido}.
+    protected function borrarComprobantes(array $partidoIds): void
+    {
+        foreach ($partidoIds as $id) {
+            File::deleteDirectory(public_path('uploads/comprobantes/'.(int) $id));
+        }
+    }
 
     // Misma lógica que en el home: el próximo partido a jugarse (fecha_hora >= ahora),
     // y si no queda ninguno, la fecha del último partido jugado. Ignora partidos sin fecha.

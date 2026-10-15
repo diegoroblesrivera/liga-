@@ -36,6 +36,10 @@
                 <div class="rounded-md bg-green-50 p-4 text-sm text-green-700">{{ session('status') }}</div>
             @endif
 
+            @php
+                $puedeBorrar = auth()->user()->hasRole('admin');
+            @endphp
+
             <div id="jornadas" class="overflow-hidden bg-white shadow-sm sm:rounded-lg" data-inicial="{{ $indiceInicial }}">
                 <div class="flex items-center justify-between border-b border-gray-100 px-3 py-2">
                     <span id="jr-prev" class="jr-arrow off" aria-label="Fecha anterior">&lsaquo;</span>
@@ -70,6 +74,28 @@
                                             </a>
                                         @endforeach
                                     </div>
+
+                                    {{-- Eliminar la fecha completa (por torneo, por si una jornada mezcla torneos) --}}
+                                    @if ($puedeBorrar)
+                                        @foreach ($j['partidos']->groupBy('torneo_id') as $partidosTorneo)
+                                            @php
+                                                $torneoFecha = $partidosTorneo->first()->torneo;
+                                                $jugados = $partidosTorneo->filter->estaFinalizado()->count();
+                                                $aviso = "¿Eliminar la fecha {$j['numero']} de \"{$torneoFecha->nombre}\"? Se borrarán sus {$partidosTorneo->count()} partidos"
+                                                    .($jugados ? ", incluidos {$jugados} ya jugados con sus goles, tarjetas y pagos (cambia la tabla de posiciones)" : '')
+                                                    .'. No se puede deshacer.';
+                                            @endphp
+                                            <form method="POST" action="{{ route('partidos.fechas.destroy', [$torneoFecha, $j['numero']]) }}"
+                                                  class="border-t border-gray-100 px-5 py-3 text-right"
+                                                  data-confirm="{{ $aviso }}" onsubmit="return confirm(this.dataset.confirm)">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-xs font-medium text-red-600 hover:text-red-800">
+                                                    Eliminar fecha {{ $j['numero'] }}{{ $j['partidos']->pluck('torneo_id')->unique()->count() > 1 ? ' de '.$torneoFecha->nombre : '' }}
+                                                </button>
+                                            </form>
+                                        @endforeach
+                                    @endif
                                 </div>
                             @endforeach
                         </div>
