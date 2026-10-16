@@ -11,8 +11,8 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" class="titulo-deportivo text-xl text-white">
-                        ⚽ <span class="hidden lg:inline">{{ config('app.name') }}</span>
+                    <a href="{{ route('dashboard') }}" aria-label="{{ config('app.name') }}">
+                        <x-logo class="text-xl [&>span:last-child]:hidden lg:[&>span:last-child]:inline" />
                     </a>
                 </div>
 

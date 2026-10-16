@@ -11,8 +11,8 @@
 <body class="flex min-h-screen flex-col bg-gray-100 font-sans text-gray-900 antialiased">
     <header class="bg-balon">
         <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-            <a href="{{ url('/') }}" class="titulo-deportivo text-xl text-white">
-                ⚽ {{ config('app.name', 'Liga') }}
+            <a href="{{ url('/') }}" aria-label="{{ config('app.name') }}">
+                <x-logo class="text-xl" />
             </a>
             <nav class="text-sm">
                 @auth

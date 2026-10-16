@@ -15,6 +15,10 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    // Correo donde los usuarios piden ver, corregir o borrar sus datos (política de privacidad).
+    // Por defecto: privacidad@<dominio de APP_URL>.
+    'correo_privacidad' => env('MAIL_PRIVACIDAD', 'privacidad@'.parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

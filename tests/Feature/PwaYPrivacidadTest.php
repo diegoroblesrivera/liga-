@@ -12,7 +12,7 @@ class PwaYPrivacidadTest extends TestCase
             ->assertOk()
             ->assertSee('Política de privacidad')
             ->assertSee('Puedes borrar tus datos cuando quieras.')
-            ->assertSee('privacidad@drr.lat')
+            ->assertSee(config('app.correo_privacidad'))
             ->assertSee('Diego Robles Rivera')
             ->assertSee('DT de su equipo')
             // Sin campos por completar del borrador
@@ -39,7 +39,7 @@ class PwaYPrivacidadTest extends TestCase
         }
 
         $manifest = json_decode(file_get_contents(public_path('manifest.webmanifest')), true);
-        $this->assertSame('Pelotas', $manifest['short_name']);
+        $this->assertSame('TuTorneo', $manifest['short_name']);
         $this->assertSame('standalone', $manifest['display']);
         foreach ($manifest['icons'] as $icono) {
             $this->assertFileExists(public_path(ltrim($icono['src'], '/')));

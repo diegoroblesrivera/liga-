@@ -1,7 +1,7 @@
-// Service worker de Pelotas: hace la app instalable y muestra una página propia sin conexión.
+// Service worker de TuTorneo: hace la app instalable y muestra una página propia sin conexión.
 // A propósito NO guarda páginas en caché: tienen datos personales (pagos, RUN, comprobantes)
 // y siempre deben venir frescas del servidor. Solo se guardan estilos, íconos y la página offline.
-const VERSION = 'pelotas-v1';
+const VERSION = 'tutorneo-v1';
 const OFFLINE = '/offline.html';
 const PRECARGA = [OFFLINE, '/icons/icono-192.png', '/icons/icono-512.png', '/manifest.webmanifest'];
 

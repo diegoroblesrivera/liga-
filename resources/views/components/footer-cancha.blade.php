@@ -35,7 +35,7 @@
              arriba) y su fondo tapa la línea central para que el texto se lea limpio. --}}
         <div class="order-first col-span-2 mb-8 flex justify-center sm:order-none sm:col-span-1 sm:mb-0">
             <div class="flex h-36 w-36 flex-col items-center justify-center rounded-full border-2 border-white/70 bg-balon/60 text-center sm:h-40 sm:w-40">
-                <a href="{{ route('home') }}" class="titulo-deportivo text-xl sm:text-2xl">⚽ {{ config('app.name') }}</a>
+                <a href="{{ route('home') }}" aria-label="{{ config('app.name') }}"><x-logo apilado pelota="h-8 w-8" class="text-lg sm:text-xl" /></a>
                 <p class="marcador mt-1 text-xl text-white/80">© {{ now()->year }}</p>
                 <a href="{{ route('privacidad') }}" class="mt-1 text-xs text-white/80 hover:text-white hover:underline">Privacidad</a>
             </div>

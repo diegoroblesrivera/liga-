@@ -6,7 +6,7 @@
         <p class="mt-1 text-sm text-gray-500">Última actualización: {{ $actualizada }}</p>
 
         <p>
-            Esta política explica qué datos personales guarda {{ config('app.name') }} (drr.lat), para qué, quién los ve
+            Esta política explica qué datos personales guarda {{ config('app.name') }} ({{ $dominio }}), para qué, quién los ve
             y cómo puedes pedir que se corrijan o se borren. {{ config('app.name') }} sirve para organizar pichangas
             semanales y campeonatos de fútbol amateur.
         </p>
@@ -85,7 +85,7 @@
             <li><strong>Google</strong>: solo si eliges iniciar sesión con Google.</li>
             <li><strong>Brevo</strong>: envío de los correos del servicio; recibe tu correo y el contenido del mensaje.</li>
             <li><strong>Bunny Fonts</strong>: tipografías del sitio; recibe tu dirección IP al cargar la página.</li>
-            <li><strong>Cloudflare</strong>: gestiona el dominio drr.lat y reenvía los correos a {{ $correo }}; no recibe el tráfico del sitio.</li>
+            <li><strong>Cloudflare</strong>: gestiona el dominio {{ $dominio }} y reenvía los correos a {{ $correo }}; no recibe el tráfico del sitio.</li>
         </ul>
         <p>Algunos de estos proveedores tratan datos fuera de Chile. Solo trabajamos con proveedores que ofrecen protecciones adecuadas para esos datos.</p>
 

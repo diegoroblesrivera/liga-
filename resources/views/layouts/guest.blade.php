@@ -17,7 +17,7 @@
     <body class="font-sans text-gray-900 antialiased">
         <div class="franjas-cesped flex min-h-screen flex-col items-center px-4 pt-8 sm:justify-center sm:pt-0">
             <a href="/" class="rounded-xl border-4 border-white bg-balon px-6 py-3 shadow-lg">
-                <span class="titulo-deportivo text-3xl text-white">⚽ {{ config('app.name') }}</span>
+                <x-logo pelota="h-9 w-9" class="text-3xl" />
             </a>
 
             <div class="mt-6 w-full overflow-hidden rounded-xl border-4 border-white bg-white px-6 py-5 shadow-xl sm:max-w-md">

@@ -1,6 +1,6 @@
 {
-    "name": "Pelotas: pichangas y campeonatos",
-    "short_name": "Pelotas",
+    "name": "TuTorneo: pichangas y campeonatos",
+    "short_name": "TuTorneo",
     "description": "Organiza tu pichanga semanal o tu campeonato de fútbol amateur.",
     "lang": "es-CL",
     "start_url": "/dashboard?origen=app",
