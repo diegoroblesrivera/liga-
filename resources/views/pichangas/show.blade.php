@@ -14,8 +14,11 @@
                 </p>
             </div>
             @if ($esOrganizador)
-                <a href="{{ route('pichangas.edit', $pichanga) }}"
-                   class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Editar pichanga</a>
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('pichangas.edit', $pichanga) }}"
+                       class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Editar pichanga</a>
+                    @include('pichangas._borrar')
+                </div>
             @endif
         </div>
     </x-slot>

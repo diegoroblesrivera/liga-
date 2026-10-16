@@ -27,6 +27,18 @@
                     </div>
                 </form>
             </div>
+
+            {{-- Zona de peligro --}}
+            <div class="mt-6 rounded-lg border border-red-200 bg-white p-6 shadow-sm">
+                <h3 class="text-sm font-semibold text-red-700">Borrar pichanga</h3>
+                <p class="mt-1 text-sm text-gray-600">
+                    Elimina para siempre todas sus fechas, la asistencia, los invitados, los pagos y los comprobantes subidos.
+                    <strong>No se puede recuperar.</strong> Si solo quieres hacer una pausa, desmarca "Activa" arriba.
+                </p>
+                <div class="mt-4">
+                    @include('pichangas._borrar', ['clases' => 'rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700'])
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>

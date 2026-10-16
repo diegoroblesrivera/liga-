@@ -163,6 +163,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pichangas/{pichanga}', [PichangaController::class, 'show'])->name('pichangas.show');
     Route::get('/pichangas/{pichanga}/editar', [PichangaController::class, 'edit'])->name('pichangas.edit');
     Route::put('/pichangas/{pichanga}', [PichangaController::class, 'update'])->name('pichangas.update');
+    Route::delete('/pichangas/{pichanga}', [PichangaController::class, 'destroy'])->name('pichangas.destroy');
     Route::delete('/pichangas/{pichanga}/miembros/{user}', [PichangaController::class, 'quitarMiembro'])->name('pichangas.miembros.destroy');
 
     Route::get('/pichangas/fechas/{fecha}', [PichangaFechaController::class, 'show'])->name('pichangas.fechas.show');

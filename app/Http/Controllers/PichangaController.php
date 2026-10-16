@@ -7,6 +7,7 @@ use App\Models\PichangaAsistencia;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -105,6 +106,24 @@ class PichangaController extends Controller
         $pichanga->update($this->validar($request) + ['activa' => $request->boolean('activa')]);
 
         return redirect()->route('pichangas.show', $pichanga)->with('status', 'Pichanga actualizada.');
+    }
+
+    // Borrar la pichanga (solo organizador). Fechas, asistencias, invitados y miembros se
+    // borran en cascada en la base; las imágenes de los comprobantes se borran aquí.
+    public function destroy(Request $request, Pichanga $pichanga)
+    {
+        abort_unless($pichanga->esOrganizador($request->user()), 403);
+
+        $nombre = $pichanga->nombre;
+        $fechas = $pichanga->fechas()->pluck('id');
+
+        DB::transaction(fn () => $pichanga->delete());
+
+        foreach ($fechas as $fechaId) {
+            Storage::disk('local')->deleteDirectory('comprobantes-pichangas/'.$fechaId);
+        }
+
+        return redirect()->route('pichangas.index')->with('status', "La pichanga \"{$nombre}\" fue borrada.");
     }
 
     // Link de invitación: confirma antes de unirse.

@@ -115,6 +115,34 @@ class PichangaPagoTest extends TestCase
         $this->assertFalse((bool) $this->fecha->asistencias()->where('user_id', $this->jugador->id)->value('pagado'));
     }
 
+    public function test_solo_el_organizador_borra_la_pichanga_con_todo_y_comprobantes(): void
+    {
+        $this->actingAs($this->jugador)->post(route('pichangas.comprobante.store', $this->fecha), [
+            'comprobante' => UploadedFile::fake()->image('t.png'),
+        ]);
+        $ruta = $this->fecha->asistencias()->where('user_id', $this->jugador->id)->value('comprobante_path');
+        Storage::disk('local')->assertExists($ruta);
+
+        // Un jugador no puede, y no ve el botón
+        $this->actingAs($this->jugador)->get(route('pichangas.show', $this->pichanga))->assertDontSee('Borrar pichanga');
+        $this->actingAs($this->jugador)->delete(route('pichangas.destroy', $this->pichanga))->assertForbidden();
+
+        // El organizador ve el botón con la advertencia y la borra
+        $this->actingAs($this->org)->get(route('pichangas.show', $this->pichanga))
+            ->assertSee('Borrar pichanga')
+            ->assertSee('NO se puede recuperar');
+        $this->actingAs($this->org)->get(route('pichangas.edit', $this->pichanga))->assertSee('No se puede recuperar.');
+
+        $this->actingAs($this->org)->delete(route('pichangas.destroy', $this->pichanga))
+            ->assertRedirect(route('pichangas.index'))
+            ->assertSessionHas('status', 'La pichanga "Martes" fue borrada.');
+
+        $this->assertNull(Pichanga::find($this->pichanga->id));
+        $this->assertSame(0, PichangaFecha::where('pichanga_id', $this->pichanga->id)->count());
+        $this->assertSame(0, \App\Models\PichangaAsistencia::where('pichanga_fecha_id', $this->fecha->id)->count());
+        Storage::disk('local')->assertMissing($ruta);
+    }
+
     public function test_el_organizador_sigue_pudiendo_marcar_pagos_presenciales(): void
     {
         $asistencia = $this->fecha->asistencias()->where('user_id', $this->jugador->id)->first();
