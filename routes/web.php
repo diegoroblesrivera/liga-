@@ -34,6 +34,12 @@ Route::post('/invitacion/{token}', [InscripcionController::class, 'store'])->nam
 
 Route::get('/',[HomeController::class, 'index'])->name('home');
 
+// Política de privacidad (pública)
+Route::get('/privacidad', fn () => view('legal.privacidad', [
+    'actualizada' => '15 de octubre de 2026',
+    'correo' => 'privacidad@drr.lat',
+]))->name('privacidad');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1F2A2E">
+    <title>Sin conexión · Pelotas</title>
+    <style>
+        body {
+            margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 24px; box-sizing: border-box;
+            background: linear-gradient(90deg, #5B9452 50%, #376F32 50%); background-size: 120px 100%;
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        }
+        .tarjeta {
+            max-width: 380px; text-align: center; color: #fff; background: #1F2A2E;
+            border: 4px solid #fff; border-radius: 16px; padding: 32px 24px;
+        }
+        h1 { font-style: italic; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin: 12px 0 8px; font-size: 26px; }
+        p { color: #d1d5db; line-height: 1.5; margin: 0 0 20px; }
+        button { background: #41B45C; color: #1F2A2E; border: 0; border-radius: 8px; padding: 12px 24px; font-weight: 700; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="tarjeta">
+        <img src="/icons/icono-192.png" alt="" width="72" height="72">
+        <h1>Sin conexión</h1>
+        <p>No hay internet en este momento. Cuando vuelva la señal, toca el botón para seguir donde estabas.</p>
+        <button onclick="location.reload()">Reintentar</button>
+    </div>
+</body>
+</html>

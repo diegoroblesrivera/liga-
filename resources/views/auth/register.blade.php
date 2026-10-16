@@ -50,5 +50,11 @@
                 Crear cuenta
             </x-primary-button>
         </div>
+
+        <p class="mt-4 text-center text-xs text-gray-500">
+            Al crear tu cuenta (con correo o con Google) aceptas la
+            <a href="{{ route('privacidad') }}" target="_blank" class="underline hover:text-gray-700">política de privacidad</a>.
+            Puedes pedir que borremos tus datos cuando quieras.
+        </p>
     </form>
 </x-guest-layout>

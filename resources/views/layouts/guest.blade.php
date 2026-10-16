@@ -9,6 +9,8 @@
 
         @include('layouts._fuentes')
 
+        @include('layouts._pwa')
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>

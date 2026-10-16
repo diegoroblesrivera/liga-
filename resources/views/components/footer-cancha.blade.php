@@ -37,6 +37,7 @@
             <div class="flex h-36 w-36 flex-col items-center justify-center rounded-full border-2 border-white/70 bg-balon/60 text-center sm:h-40 sm:w-40">
                 <a href="{{ route('home') }}" class="titulo-deportivo text-xl sm:text-2xl">⚽ {{ config('app.name') }}</a>
                 <p class="marcador mt-1 text-xl text-white/80">© {{ now()->year }}</p>
+                <a href="{{ route('privacidad') }}" class="mt-1 text-xs text-white/80 hover:text-white hover:underline">Privacidad</a>
             </div>
         </div>
 
