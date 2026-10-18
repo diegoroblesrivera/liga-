@@ -14,7 +14,7 @@
             @if ($pago)
                 <div class="mb-4">
                     <p class="text-sm text-gray-500 mb-1">Comprobante actual:</p>
-                    <img src="{{ asset('storage/' . $pago->comprobante_path) }}" class="max-h-64 rounded border">
+                    <img src="{{ route('pagos.comprobante.ver', $pago) }}" class="max-h-64 rounded border">
                 </div>
             @endif
 

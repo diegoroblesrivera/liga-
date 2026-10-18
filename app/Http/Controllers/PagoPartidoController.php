@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -150,7 +151,8 @@ class PagoPartidoController extends Controller
     }
 
     /**
-     * Guarda / reemplaza el comprobante en public_html/uploads/comprobantes/{partido}.
+     * Guarda / reemplaza el comprobante en storage/app/private/comprobantes-partidos/{partido},
+     * fuera de la parte pública del sitio y con nombre aleatorio (muestra datos bancarios).
      */
     public function store(Request $request, Partido $partido)
     {
@@ -159,7 +161,9 @@ class PagoPartidoController extends Controller
         abort_unless($partido->monto_pago !== null, 404, 'Este partido no tiene un pago asignado.');
 
         $request->validate([
-            'comprobante' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'comprobante' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+        ], [
+            'comprobante.max' => 'La imagen no puede pesar más de 10 MB.',
         ]);
 
         $equipoId = Auth::user()->equipo_id;
@@ -169,29 +173,44 @@ class PagoPartidoController extends Controller
             'equipo_id' => $equipoId,
         ]);
 
-        $carpeta = 'uploads/comprobantes/'.$partido->id;
-        $dir = public_path($carpeta);
-        if (! is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
+        $anterior = $pago->exists ? $pago->comprobante_path : null;
 
-        if ($pago->exists && $pago->comprobante_path && is_file(public_path($pago->comprobante_path))) {
-            @unlink(public_path($pago->comprobante_path));
-        }
-
-        $file = $request->file('comprobante');
-        $nombre = 'comp_'.$partido->id.'_'.$equipoId.'_'.time().'.'.$file->getClientOriginalExtension();
-        $file->move($dir, $nombre);
+        $ruta = $request->file('comprobante')->store('comprobantes-partidos/'.$partido->id, 'local');
 
         $pago->fill([
-            'comprobante_path' => $carpeta.'/'.$nombre,
+            'comprobante_path' => $ruta,
             'subido_por' => Auth::id(),
             'fecha_subida' => now(),
         ])->save();
 
+        if ($anterior) {
+            Storage::disk('local')->delete($anterior);
+        }
+
         return redirect()
             ->route('pagos.mis-pagos')
             ->with('status', 'Comprobante subido correctamente.');
+    }
+
+    /**
+     * Ver un comprobante: solo el admin del campeonato o el DT del equipo que pagó
+     * (el DT rival no ve los datos bancarios del otro equipo).
+     */
+    public function verComprobante(PagoPartido $pago)
+    {
+        $user = Auth::user();
+
+        abort_unless(
+            Gate::allows('gestionar-pagos') || ($user->equipo_id && $user->equipo_id === $pago->equipo_id),
+            403
+        );
+
+        abort_unless(
+            $pago->comprobante_path && Storage::disk('local')->exists($pago->comprobante_path),
+            404
+        );
+
+        return Storage::disk('local')->response($pago->comprobante_path);
     }
 
     // --- Helpers ---

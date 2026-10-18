@@ -9,7 +9,7 @@ use App\Models\Torneo;
 use App\Support\LigaActual;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class PartidoController extends Controller
 {
@@ -186,11 +186,11 @@ class PartidoController extends Controller
 
     // --- Helpers ---
 
-    // Los comprobantes de pago de cada partido viven en public/uploads/comprobantes/{partido}.
+    // Los comprobantes de pago de cada partido viven en storage/app/private/comprobantes-partidos/{partido}.
     protected function borrarComprobantes(array $partidoIds): void
     {
         foreach ($partidoIds as $id) {
-            File::deleteDirectory(public_path('uploads/comprobantes/'.(int) $id));
+            Storage::disk('local')->deleteDirectory('comprobantes-partidos/'.(int) $id);
         }
     }
 

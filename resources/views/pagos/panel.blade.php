@@ -62,7 +62,7 @@
                                     <span class="flex items-center gap-3">
                                         @if ($pagoLocal && $pagoLocal->comprobante_path)
                                             <span>🟢 Pagado</span>
-                                            <a href="{{ asset($pagoLocal->comprobante_path) }}" target="_blank"
+                                            <a href="{{ route('pagos.comprobante.ver', $pagoLocal) }}" target="_blank"
                                                class="text-indigo-600 hover:text-indigo-800">Ver comprobante</a>
                                         @else
                                             <span>🔴 Pendiente</span>
@@ -75,7 +75,7 @@
                                     <span class="flex items-center gap-3">
                                         @if ($pagoVisita && $pagoVisita->comprobante_path)
                                             <span>🟢 Pagado</span>
-                                            <a href="{{ asset($pagoVisita->comprobante_path) }}" target="_blank"
+                                            <a href="{{ route('pagos.comprobante.ver', $pagoVisita) }}" target="_blank"
                                                class="text-indigo-600 hover:text-indigo-800">Ver comprobante</a>
                                         @else
                                             <span>🔴 Pendiente</span>

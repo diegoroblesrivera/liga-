@@ -98,6 +98,7 @@ Route::middleware(['auth', 'torneos'])->group(function () {
     Route::get('/mis-pagos', [PagoPartidoController::class, 'misPagos'])->name('pagos.mis-pagos');
     Route::get('/partidos/{partido}/comprobante', [PagoPartidoController::class, 'create'])->name('pagos.comprobante.create');
     Route::post('/partidos/{partido}/comprobante', [PagoPartidoController::class, 'store'])->name('pagos.comprobante.store');
+    Route::get('/pagos/{pago}/comprobante', [PagoPartidoController::class, 'verComprobante'])->name('pagos.comprobante.ver');
     //Tarjetas
 
     Route::post('/partidos/{partido}/tarjetas', [TarjetaController::class, 'store'])->name('tarjetas.store');

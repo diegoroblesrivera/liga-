@@ -316,7 +316,7 @@
                                     <li class="flex items-center justify-between rounded border p-3 text-sm">
                                         <span>{{ $equipo->nombre }}</span>
                                         @if ($pago && $pago->comprobante_path)
-                                            <a href="{{ asset($pago->comprobante_path) }}" target="_blank"
+                                            <a href="{{ route('pagos.comprobante.ver', $pago) }}" target="_blank"
                                                class="rounded bg-green-100 px-2 py-1 text-xs text-green-800">Ver comprobante</a>
                                         @else
                                             <span class="rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-800">Pendiente</span>

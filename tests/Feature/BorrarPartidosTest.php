@@ -12,7 +12,7 @@ use App\Models\Partido;
 use App\Models\Torneo;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 // Requiere MySQL (las migraciones usan vistas, triggers y ALTER ... ENUM).
@@ -53,10 +53,10 @@ class BorrarPartidosTest extends TestCase
         $jugador = Jugador::forceCreate(['equipo_id' => $this->local->id, 'nombre' => 'Goleador']);
         Gol::forceCreate(['partido_id' => $partido->id, 'jugador_id' => $jugador->id, 'equipo_id' => $this->local->id, 'minuto' => 10, 'tipo' => 'normal']);
 
-        $carpeta = public_path('uploads/comprobantes/'.$partido->id);
-        File::ensureDirectoryExists($carpeta);
-        File::put($carpeta.'/comp.jpg', 'x');
-        PagoPartido::forceCreate(['partido_id' => $partido->id, 'equipo_id' => $this->local->id, 'comprobante_path' => 'uploads/comprobantes/'.$partido->id.'/comp.jpg']);
+        Storage::fake('local');
+        $ruta = 'comprobantes-partidos/'.$partido->id.'/comp.jpg';
+        Storage::disk('local')->put($ruta, 'x');
+        PagoPartido::forceCreate(['partido_id' => $partido->id, 'equipo_id' => $this->local->id, 'comprobante_path' => $ruta]);
 
         $this->actingAs($this->admin)->get(route('partidos.show', $partido))
             ->assertOk()->assertSee('Eliminar')->assertSee('cambia la tabla de posiciones');
@@ -68,7 +68,7 @@ class BorrarPartidosTest extends TestCase
         $this->assertNull(Partido::withoutGlobalScopes()->find($partido->id));
         $this->assertSame(0, Gol::withoutGlobalScopes()->where('partido_id', $partido->id)->count());
         $this->assertSame(0, PagoPartido::withoutGlobalScopes()->where('partido_id', $partido->id)->count());
-        $this->assertDirectoryDoesNotExist($carpeta);
+        Storage::disk('local')->assertMissing($ruta);
     }
 
     public function test_el_admin_elimina_una_fecha_completa_solo_de_ese_torneo(): void
