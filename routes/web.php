@@ -25,6 +25,9 @@ use App\Http\Controllers\PichangaPagoController;
 use App\Http\Controllers\PichangaInvitadoController;
 use App\Http\Controllers\CampeonatoController;
 use App\Http\Controllers\CampeonatoPublicoController;
+use App\Http\Controllers\PlanController;
+use App\Http\Controllers\WebhookMercadoPagoController;
+use App\Http\Controllers\AdminCampeonatosController;
 
 
 // Registro por invitación a un equipo (público)
@@ -55,6 +58,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/campeonatos/crear', [CampeonatoController::class, 'create'])->name('campeonatos.create');
     Route::post('/campeonatos', [CampeonatoController::class, 'store'])->name('campeonatos.store');
     Route::post('/campeonatos/{liga}/usar', [CampeonatoController::class, 'usar'])->name('campeonatos.usar');
+
+    // Regreso desde Mercado Pago tras pagar el Pro (verifica el pago con Mercado Pago)
+    Route::get('/configuracion/plan/retorno', [PlanController::class, 'retorno'])->name('campeonatos.plan.retorno');
 });
 
 // Campeonato: solo quienes participan en algún torneo (admin, DT, jugador o árbitro).
@@ -129,6 +135,8 @@ Route::get('/pagos/exportar/pdf', [PagoPartidoController::class, 'exportarPdf'])
 // Configuración (panel de administración)
 Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion.index');
 Route::get('/configuracion/campeonato', [CampeonatoController::class, 'edit'])->name('campeonatos.edit');
+Route::get('/configuracion/plan', [PlanController::class, 'show'])->name('campeonatos.plan');
+Route::post('/configuracion/plan/pagar', [PlanController::class, 'pagar'])->name('campeonatos.plan.pagar');
 Route::put('/configuracion/campeonato', [CampeonatoController::class, 'update'])->name('campeonatos.update');
 Route::get('/jugadores', [JugadorController::class, 'index'])->name('jugadores.index');
 
@@ -177,6 +185,17 @@ Route::middleware('auth')->group(function () {
     Route::post('/pichangas/fechas/{fecha}/invitados', [PichangaInvitadoController::class, 'store'])->name('pichangas.invitados.store');
     Route::delete('/pichangas/invitados/{asistencia}', [PichangaInvitadoController::class, 'destroy'])->name('pichangas.invitados.destroy');
     Route::get('/pichangas/asistencias/{asistencia}/comprobante', [PichangaPagoController::class, 'show'])->name('pichangas.comprobante.show');
+});
+
+// Avisos de pago de Mercado Pago (público; sin CSRF, ver bootstrap/app.php)
+Route::post('/webhooks/mercadopago', WebhookMercadoPagoController::class)->name('webhooks.mercadopago');
+
+// Panel interno del super admin
+Route::middleware(['auth', 'superadmin'])->prefix('admin')->group(function () {
+    Route::get('/campeonatos', [AdminCampeonatosController::class, 'index'])->name('admin.campeonatos');
+    Route::post('/campeonatos/{liga}/pro', [AdminCampeonatosController::class, 'activarPro'])->name('admin.campeonatos.pro');
+    Route::delete('/campeonatos/{liga}/pro', [AdminCampeonatosController::class, 'quitarPro'])->name('admin.campeonatos.pro.quitar');
+    Route::put('/precio-pro', [AdminCampeonatosController::class, 'precio'])->name('admin.precio');
 });
 
 // Página pública de un campeonato (después de /campeonatos/crear para no capturarla)

@@ -22,6 +22,22 @@
                     </p>
                 </a>
 
+                @php($ligaPlan = \App\Support\LigaActual::liga())
+                <a href="{{ route('campeonatos.plan') }}"
+                   class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-cancha-100 hover:shadow-md transition-shadow sm:col-span-2">
+                    <h3 class="text-sm font-semibold text-gray-900">
+                        ⭐ Plan del campeonato:
+                        <span class="{{ $ligaPlan?->esPro() ? 'text-cancha-600' : 'text-gray-700' }}">{{ $ligaPlan?->esPro() ? 'Pro' : 'Gratis' }}</span>
+                    </h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        @if ($ligaPlan?->esPro())
+                            Equipos ilimitados, vigente hasta el {{ $ligaPlan->pro_hasta->format('d/m/Y') }}.
+                        @else
+                            {{ $ligaPlan?->equipos()->count() }} de {{ \App\Models\Liga::EQUIPOS_PLAN_GRATIS }} equipos. Pasa a Pro para equipos ilimitados.
+                        @endif
+                    </p>
+                </a>
+
                 <a href="{{ route('jugadores.index') }}"
                    class="rounded-lg bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
                     <h3 class="text-sm font-semibold text-gray-900">Jugadores</h3>

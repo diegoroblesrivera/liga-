@@ -14,7 +14,12 @@ $app = Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'torneos' => \App\Http\Middleware\EnsureParticipaEnTorneos::class,
+            'superadmin' => \App\Http\Middleware\EnsureSuperAdmin::class,
         ]);
+
+        // Mercado Pago llama a esta ruta desde sus servidores: no trae token CSRF.
+        // Su contenido no se usa tal cual: el pago se verifica consultando a Mercado Pago.
+        $middleware->validateCsrfTokens(except: ['webhooks/mercadopago']);
 
         // Campeonato actual del usuario (filtra equipos, torneos, partidos...).
         // Debe correr ANTES de SubstituteBindings: si no, /equipos/{equipo} buscaría

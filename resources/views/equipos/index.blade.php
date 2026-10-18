@@ -4,10 +4,19 @@
             <h2 class="text-xl font-semibold leading-tight text-gray-800">Equipos</h2>
 
             @can('create', App\Models\Equipo::class)
-                <a href="{{ route('equipos.create') }}"
-                   class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
-                    Crear equipo
-                </a>
+                @php($ligaPlan = \App\Support\LigaActual::liga())
+                <div class="flex items-center gap-3">
+                    @unless ($ligaPlan->esPro())
+                        <a href="{{ route('campeonatos.plan') }}" class="text-xs text-gray-500 hover:text-gray-700"
+                           title="Plan Gratis: hasta {{ \App\Models\Liga::EQUIPOS_PLAN_GRATIS }} equipos">
+                            {{ $equipos->count() }}/{{ \App\Models\Liga::EQUIPOS_PLAN_GRATIS }} equipos · Gratis
+                        </a>
+                    @endunless
+                    <a href="{{ route('equipos.create') }}"
+                       class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+                        Crear equipo
+                    </a>
+                </div>
             @endcan
         </div>
     </x-slot>

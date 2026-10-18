@@ -25,6 +25,10 @@ class EquipoController extends Controller
     {
         $this->authorize('create', Equipo::class);
 
+        if ($limite = $this->limiteAlcanzado()) {
+            return $limite;
+        }
+
         $modalidades = Modalidad::orderBy('nombre')->get();
 
         return view('equipos.create', compact('modalidades'));
@@ -33,6 +37,10 @@ class EquipoController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Equipo::class);
+
+        if ($limite = $this->limiteAlcanzado()) {
+            return $limite;
+        }
 
         $data = $request->validate([
             'nombre' => ['required', 'string', 'max:120', LigaActual::unico('equipos', 'nombre')],
@@ -103,6 +111,19 @@ class EquipoController extends Controller
         $this->guardarImagen($request, $equipo, 'foto', 'equipos', 'foto');
 
         return redirect()->route('equipos.show', $equipo)->with('status', 'Equipo actualizado.');
+    }
+
+    // Plan Gratis: hasta Liga::EQUIPOS_PLAN_GRATIS equipos. Al pasarse, a la página del plan.
+    protected function limiteAlcanzado()
+    {
+        $liga = LigaActual::liga();
+
+        if ($liga->puedeAgregarEquipo()) {
+            return null;
+        }
+
+        return redirect()->route('campeonatos.plan')->with('aviso',
+            'El plan Gratis permite hasta '.$liga->limiteEquipos().' equipos. Pasa a Pro para agregar más.');
     }
 
     // Guarda un archivo en public_html/uploads/{carpeta} y actualiza el campo del modelo.

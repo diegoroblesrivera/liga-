@@ -13,12 +13,53 @@ class Liga extends Model
 {
     protected $table = 'ligas';
 
-    protected $fillable = ['nombre', 'slug', 'descripcion', 'logo', 'owner_id', 'activa', 'publica'];
+    protected $fillable = ['nombre', 'slug', 'descripcion', 'logo', 'owner_id', 'activa', 'publica', 'pro_hasta'];
 
     protected $casts = [
         'activa' => 'boolean',
         'publica' => 'boolean',
+        'pro_hasta' => 'datetime',
     ];
+
+    // Plan Gratis: hasta 8 equipos, todas las funciones. Pro: equipos ilimitados.
+    public const EQUIPOS_PLAN_GRATIS = 8;
+
+    // --- Plan ---
+
+    public function esPro(): bool
+    {
+        return $this->pro_hasta !== null && $this->pro_hasta->isFuture();
+    }
+
+    // null = sin límite.
+    public function limiteEquipos(): ?int
+    {
+        return $this->esPro() ? null : self::EQUIPOS_PLAN_GRATIS;
+    }
+
+    public function puedeAgregarEquipo(): bool
+    {
+        $limite = $this->limiteEquipos();
+
+        return $limite === null || $this->equipos()->count() < $limite;
+    }
+
+    // Activa (o extiende) el Pro por un año. Si aún está vigente, el año se suma al final.
+    // Devuelve [desde, hasta] del período cubierto.
+    public function extenderProUnAnio(): array
+    {
+        $desde = $this->esPro() ? $this->pro_hasta->copy() : now();
+        $hasta = $desde->copy()->addYear();
+
+        $this->forceFill(['pro_hasta' => $hasta])->save();
+
+        return [$desde, $hasta];
+    }
+
+    public function pagosPro(): HasMany
+    {
+        return $this->hasMany(PagoPro::class)->latest();
+    }
 
     public function getRouteKeyName(): string
     {

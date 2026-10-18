@@ -34,6 +34,12 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
 
+    // Pago del plan Pro (Checkout Pro). Credenciales de prueba: access token que empieza con TEST-.
+    'mercadopago' => [
+        'access_token' => env('MP_ACCESS_TOKEN'),
+        'webhook_secret' => env('MP_WEBHOOK_SECRET'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
