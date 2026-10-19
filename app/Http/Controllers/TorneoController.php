@@ -50,6 +50,33 @@ class TorneoController extends Controller
         return redirect()->route('torneos.index')->with('status', 'Torneo actualizado.');
     }
 
+    // Cerrar el torneo: se entregan los logros de Campeón, Pichichi y Asistencia perfecta.
+    public function cerrar(Request $request, Torneo $torneo)
+    {
+        abort_unless($request->user()->hasRole('admin'), 403);
+
+        $pendientes = $torneo->partidos()->whereIn('estado', ['programado', 'en_juego'])->count();
+        if ($pendientes) {
+            return back()->withErrors(['torneo' => "Faltan {$pendientes} partidos por jugar (o suspenderlos) antes de cerrar el torneo."]);
+        }
+        if (! $torneo->partidos()->where('estado', 'finalizado')->exists()) {
+            return back()->withErrors(['torneo' => 'El torneo no tiene partidos jugados.']);
+        }
+
+        $torneo->forceFill(['cerrado_en' => now()])->save();
+
+        return back()->with('status', 'Torneo cerrado: se entregaron los logros de campeón y goleador.');
+    }
+
+    public function reabrir(Request $request, Torneo $torneo)
+    {
+        abort_unless($request->user()->hasRole('admin'), 403);
+
+        $torneo->forceFill(['cerrado_en' => null])->save();
+
+        return back()->with('status', 'Torneo reabierto: se quitaron los logros de cierre hasta que lo vuelvas a cerrar.');
+    }
+
     public function destroy(Request $request, Torneo $torneo)
     {
         abort_unless($request->user()->hasRole('admin'), 403);

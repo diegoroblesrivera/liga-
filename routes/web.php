@@ -167,6 +167,8 @@ Route::post('/torneos', [TorneoController::class, 'store'])->name('torneos.store
 Route::get('/torneos/{torneo}/editar', [TorneoController::class, 'edit'])->name('torneos.edit');
 Route::put('/torneos/{torneo}', [TorneoController::class, 'update'])->name('torneos.update');
 Route::delete('/torneos/{torneo}', [TorneoController::class, 'destroy'])->name('torneos.destroy');
+Route::post('/torneos/{torneo}/cerrar', [TorneoController::class, 'cerrar'])->name('torneos.cerrar');
+Route::delete('/torneos/{torneo}/cerrar', [TorneoController::class, 'reabrir'])->name('torneos.reabrir');
 
 Route::get('/jugadores/{jugador}/editar', [JugadorController::class, 'edit'])->name('jugadores.edit');
 Route::put('/jugadores/{jugador}', [JugadorController::class, 'update'])->name('jugadores.update');

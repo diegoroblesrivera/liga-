@@ -16,6 +16,7 @@ class Torneo extends Model
     protected $fillable = ['nombre', 'temporada', 'fecha_inicio', 'fecha_fin'];
 
     protected $casts = [
+        'cerrado_en' => 'datetime',
         'fecha_inicio' => 'date',
         'fecha_fin' => 'date',
     ];

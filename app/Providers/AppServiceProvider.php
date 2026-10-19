@@ -26,5 +26,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function (User $user, string $ability) {
             return $user->hasRole('admin') ? true : null;
         });
+
+        \App\Support\Logros\Disparadores::registrar();
     }
 }
