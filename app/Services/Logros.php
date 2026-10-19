@@ -76,10 +76,7 @@ class Logros
 
     public function recalcularJugador(int $jugadorId): void
     {
-        $jugador = DB::table('jugadores')
-            ->join('equipos', 'equipos.id', '=', 'jugadores.equipo_id')
-            ->where('jugadores.id', $jugadorId)
-            ->first(['jugadores.id', 'jugadores.equipo_id', 'jugadores.posicion', 'equipos.liga_id']);
+        $jugador = $this->ficha($jugadorId);
 
         if (! $jugador) {
             return;
@@ -133,6 +130,45 @@ class Logros
         }
 
         $this->sincronizar(['jugador_id' => $jugador->id], Catalogo::clavesDe('jugador'), $deseados, $this->esPro($jugador->liga_id));
+    }
+
+    // Para mostrar el avance de los logros por cantidad (7/10 goles, racha actual...).
+    public function progresoJugador(int $jugadorId): array
+    {
+        $jugador = $this->ficha($jugadorId);
+        $partidos = $jugador ? $this->partidosJugados($jugador) : collect();
+
+        $racha = function (callable $cumple) use ($partidos) {
+            $n = 0;
+            foreach ($partidos->reverse() as $p) {
+                if (! $cumple($p)) {
+                    break;
+                }
+                $n++;
+            }
+
+            return $n;
+        };
+
+        return [
+            'goles' => (int) $partidos->sum('goles_jugador'),
+            'partidos' => $partidos->count(),
+            'partidos sin tarjeta' => $racha(fn ($p) => $p->tarjetas_jugador === 0),
+            'partidos seguidos con gol' => $racha(fn ($p) => $p->goles_jugador > 0),
+        ];
+    }
+
+    public function progresoPichangas(int $userId): array
+    {
+        return ['pichangas' => $this->pichangasJugadas($userId)->count()];
+    }
+
+    private function ficha(int $jugadorId): ?object
+    {
+        return DB::table('jugadores')
+            ->join('equipos', 'equipos.id', '=', 'jugadores.equipo_id')
+            ->where('jugadores.id', $jugadorId)
+            ->first(['jugadores.id', 'jugadores.equipo_id', 'jugadores.posicion', 'equipos.liga_id']);
     }
 
     // Partidos finalizados de su equipo en los que consta que jugó: en la lista, convocado,
@@ -271,13 +307,7 @@ class Logros
 
     public function recalcularUsuarioPichangas(int $userId): void
     {
-        $jugadas = DB::table('pichanga_asistencias as a')
-            ->join('pichanga_fechas as f', 'f.id', '=', 'a.pichanga_fecha_id')
-            ->where('a.user_id', $userId)
-            ->where('a.estado', 'confirmado')
-            ->where('f.estado', 'jugada')
-            ->orderBy('f.fecha')
-            ->get(['f.fecha', 'f.hora', 'a.goles']);
+        $jugadas = $this->pichangasJugadas($userId);
 
         $deseados = [];
         $otorgar = function (string $clave, object $fila) use (&$deseados, $userId) {
@@ -300,6 +330,17 @@ class Logros
         }
 
         $this->sincronizar(['user_id' => $userId], Catalogo::clavesDe('pichanga'), $deseados, false);
+    }
+
+    private function pichangasJugadas(int $userId): Collection
+    {
+        return DB::table('pichanga_asistencias as a')
+            ->join('pichanga_fechas as f', 'f.id', '=', 'a.pichanga_fecha_id')
+            ->where('a.user_id', $userId)
+            ->where('a.estado', 'confirmado')
+            ->where('f.estado', 'jugada')
+            ->orderBy('f.fecha')
+            ->get(['f.fecha', 'f.hora', 'a.goles']);
     }
 
     // ---------------------------------------------------------------- comunes

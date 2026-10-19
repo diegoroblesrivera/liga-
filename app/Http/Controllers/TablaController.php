@@ -37,7 +37,9 @@ class TablaController extends Controller
                 ->get()
             : collect();
 
-        return view('tablas.goleadores', compact('torneos', 'torneo', 'goleadores'));
+        $insignias = \App\Support\Logros\Insignias::mejores($goleadores->pluck('jugador_id'));
+
+        return view('tablas.goleadores', compact('torneos', 'torneo', 'goleadores', 'insignias'));
     }
 
     // Resuelve el torneo elegido (?torneo=ID) o cae en el primero disponible.

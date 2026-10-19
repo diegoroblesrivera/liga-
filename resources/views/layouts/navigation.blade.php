@@ -112,6 +112,7 @@
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
+                        <x-dropdown-link :href="route('logros.mios')">🏅 Mis logros</x-dropdown-link>
 
                         @if (auth()->user()->is_super_admin)
                             <x-dropdown-link :href="route('admin.campeonatos')">Panel TuTorneo</x-dropdown-link>
@@ -221,6 +222,7 @@
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('logros.mios')">🏅 Mis logros</x-responsive-nav-link>
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">

@@ -68,8 +68,9 @@ class EquipoController extends Controller
         $this->authorize('view', $equipo);
 
         $equipo->load('modalidad', 'jugadores', 'dt', 'invitaciones');
+        $insignias = \App\Support\Logros\Insignias::mejores($equipo->jugadores->pluck('id'));
 
-        return view('equipos.show', compact('equipo'));
+        return view('equipos.show', compact('equipo', 'insignias'));
     }
 
     public function edit(Equipo $equipo)

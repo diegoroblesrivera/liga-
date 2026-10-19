@@ -27,7 +27,10 @@
                             @forelse ($goleadores as $i => $fila)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-3 text-gray-500">{{ $i + 1 }}</td>
-                                    <td class="px-4 py-3 font-medium text-gray-900">{{ $fila->jugador }}</td>
+                                    <td class="px-4 py-3 font-medium text-gray-900">
+                                        <a href="{{ route('jugadores.logros', $fila->jugador_id) }}" class="hover:text-indigo-700">{{ $fila->jugador }}</a>
+                                        @include('logros._mini', ['iconos' => $insignias->get($fila->jugador_id)])
+                                    </td>
                                     <td class="px-4 py-3 text-gray-700">{{ $fila->equipo }}</td>
                                     <td class="px-3 py-3 text-center font-semibold text-gray-900">{{ $fila->goles }}</td>
                                 </tr>

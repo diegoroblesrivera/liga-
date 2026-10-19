@@ -143,7 +143,8 @@
                                 @if ($jugador->dorsal)
                                     <span class="mr-1 text-gray-400">#{{ $jugador->dorsal }}</span>
                                 @endif
-                                {{ $jugador->nombre }}
+                                <a href="{{ route('jugadores.logros', $jugador) }}" class="hover:text-indigo-700">{{ $jugador->nombre }}</a>
+                                @include('logros._mini', ['iconos' => $insignias->get($jugador->id)])
                             </span>
                         </span>
                         <div class="flex items-center gap-3">

@@ -27,6 +27,8 @@
                 </header>
             @endisset
 
+            @include('logros._aviso')
+
             <!-- Page Content -->
             <main class="flex-1">
                 {{ $slot }}
