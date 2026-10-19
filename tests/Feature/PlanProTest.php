@@ -85,7 +85,7 @@ class PlanProTest extends TestCase
         Http::assertSent(fn ($r) => $r['external_reference'] === (string) $pago->id
             && $r['items'][0]['unit_price'] === 29990
             && $r['items'][0]['currency_id'] === 'CLP'
-            && $r['notification_url'] === route('webhooks.mercadopago'));
+            && ! isset($r['notification_url'])); // en local (http) no se manda el aviso
     }
 
     public function test_el_webhook_activa_el_pro_solo_con_pago_aprobado_verificado_en_mercado_pago(): void

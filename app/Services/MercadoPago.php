@@ -33,7 +33,7 @@ class MercadoPago
     /** @return array{id: string, url: string} */
     public function crearPreferencia(PagoPro $pago, Liga $liga, User $user): array
     {
-        $respuesta = $this->http()->post(self::API.'/checkout/preferences', [
+        $datos = [
             'items' => [[
                 'id' => 'tutorneo-pro-anual',
                 'title' => config('app.name').' Pro anual · '.$liga->nombre,
@@ -49,10 +49,17 @@ class MercadoPago
                 'pending' => route('campeonatos.plan.retorno'),
                 'failure' => route('campeonatos.plan.retorno'),
             ],
-            'auto_return' => 'approved',
-            'notification_url' => route('webhooks.mercadopago'),
             'statement_descriptor' => 'TUTORNEO',
-        ]);
+        ];
+
+        // Mercado Pago no acepta avisos ni vuelta automática a localhost; en local
+        // se vuelve con el botón "Volver al sitio" y el retorno activa el Pro igual.
+        if (str_starts_with(route('webhooks.mercadopago'), 'https://')) {
+            $datos['auto_return'] = 'approved';
+            $datos['notification_url'] = route('webhooks.mercadopago');
+        }
+
+        $respuesta = $this->http()->post(self::API.'/checkout/preferences', $datos);
 
         if (! $respuesta->successful()) {
             throw new RuntimeException('Mercado Pago rechazó la preferencia: '.$respuesta->status().' '.$respuesta->body());
