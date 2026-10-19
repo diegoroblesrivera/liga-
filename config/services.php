@@ -38,6 +38,8 @@ return [
     'mercadopago' => [
         'access_token' => env('MP_ACCESS_TOKEN'),
         'webhook_secret' => env('MP_WEBHOOK_SECRET'),
+        // true con credenciales de una cuenta de prueba (APP_USR- de un TESTUSER)
+        'prueba' => (bool) env('MP_PRUEBA', false),
     ],
 
     'slack' => [

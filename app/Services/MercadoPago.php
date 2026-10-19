@@ -24,8 +24,13 @@ class MercadoPago
         return filled(config('services.mercadopago.access_token'));
     }
 
-    // Credenciales de prueba: el access token empieza con TEST-.
+    // Credenciales de prueba: token TEST- (antiguas) o MP_PRUEBA=true (cuenta TESTUSER).
     public function modoPrueba(): bool
+    {
+        return $this->tokenSandbox() || config('services.mercadopago.prueba');
+    }
+
+    protected function tokenSandbox(): bool
     {
         return str_starts_with((string) config('services.mercadopago.access_token'), 'TEST-');
     }
@@ -42,7 +47,6 @@ class MercadoPago
                 'currency_id' => 'CLP',
                 'unit_price' => $pago->monto,
             ]],
-            'payer' => ['email' => $user->email, 'name' => $user->name],
             'external_reference' => (string) $pago->id,
             'back_urls' => [
                 'success' => route('campeonatos.plan.retorno'),
@@ -51,6 +55,12 @@ class MercadoPago
             ],
             'statement_descriptor' => 'TUTORNEO',
         ];
+
+        // En prueba no se manda el comprador: un email real contra un vendedor de prueba
+        // hace que Mercado Pago bloquee el pago ("una de las partes es de prueba").
+        if (! $this->modoPrueba()) {
+            $datos['payer'] = ['email' => $user->email, 'name' => $user->name];
+        }
 
         // Mercado Pago no acepta avisos ni vuelta automática a localhost; en local
         // se vuelve con el botón "Volver al sitio" y el retorno activa el Pro igual.
@@ -67,7 +77,7 @@ class MercadoPago
 
         return [
             'id' => (string) $respuesta->json('id'),
-            'url' => $this->modoPrueba()
+            'url' => $this->tokenSandbox()
                 ? ($respuesta->json('sandbox_init_point') ?? $respuesta->json('init_point'))
                 : $respuesta->json('init_point'),
         ];
