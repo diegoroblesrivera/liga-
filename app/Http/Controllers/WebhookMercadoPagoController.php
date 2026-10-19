@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\ActivarPro;
 use App\Services\MercadoPago;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 // Avisos de Mercado Pago (notification_url). Solo trae el id del pago: el resultado real
@@ -14,6 +15,15 @@ class WebhookMercadoPagoController extends Controller
     public function __invoke(Request $request, MercadoPago $mp, ActivarPro $activar)
     {
         if (! $mp->firmaValida($request)) {
+            // Sin la clave: solo lo necesario para revisar por qué no coincide la firma.
+            Log::warning('Webhook Mercado Pago con firma inválida', [
+                'query' => $request->query(),
+                'body_type' => $request->input('type'),
+                'body_data_id' => $request->input('data.id'),
+                'x_signature' => $request->header('x-signature'),
+                'x_request_id' => $request->header('x-request-id'),
+            ]);
+
             return response()->json(['ok' => false, 'error' => 'firma inválida'], 401);
         }
 

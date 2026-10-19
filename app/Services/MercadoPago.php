@@ -127,7 +127,8 @@ class MercadoPago
             return false;
         }
 
-        $id = strtolower((string) $request->query('data_id', $request->input('data.id', '')));
+        // data.id llega en la URL (PHP lo deja como data_id); los avisos con topic traen ?id=
+        $id = strtolower((string) ($request->query('data_id') ?? $request->query('id') ?? $request->input('data.id', '')));
         $manifiesto = "id:{$id};request-id:".$request->header('x-request-id').";ts:{$ts};";
 
         return hash_equals(hash_hmac('sha256', $manifiesto, $secreto), $v1);
