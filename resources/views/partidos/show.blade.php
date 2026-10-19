@@ -57,6 +57,14 @@
         $suspLocal = \App\Support\Suspension::suspendidosEnPartido($partido, $partido->equipo_local_id);
         $suspVisita = \App\Support\Suspension::suspendidosEnPartido($partido, $partido->equipo_visita_id);
         $suspTodos = array_merge($suspLocal, $suspVisita);
+
+        // Lista de asistencia (si el campeonato la pide)
+        $ligaLista = \App\Support\LigaActual::liga();
+        $conLista = (bool) $ligaLista?->pedir_lista;
+        $asistencias = $conLista ? $partido->asistencias()->get()->keyBy('jugador_id') : collect();
+        $exigeLista = $conLista && $ligaLista->exigeLista();
+        $gestionaLista = $conLista && $yo && \App\Support\Lista::puedeMarcar($yo, $partido);
+        $miFicha = $yo ? $partido->equipoLocal->jugadores->merge($partido->equipoVisita->jugadores)->firstWhere('user_id', $yo->id) : null;
     @endphp
 
     <div class="py-8">
@@ -186,6 +194,32 @@
                 </div>
             </div>
 
+            {{-- Lista de asistencia --}}
+            @if ($conLista && ($gestionaLista || $miFicha))
+                <div class="bg-white p-6 shadow-sm sm:rounded-lg">
+                    <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                        <h3 class="text-base font-medium text-gray-900">
+                            📋 Lista de asistencia
+                            @if ($exigeLista)<span class="ms-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700">sin lista no se juega</span>@endif
+                        </h3>
+                        @if (\App\Support\Lista::puedeGestionarFecha($yo, collect([$partido])))
+                            <a href="{{ route('lista.fecha', [$partido->torneo_id, $partido->numero_fecha]) }}"
+                               class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Mostrar QR de la fecha →</a>
+                        @endif
+                    </div>
+                    @if ($gestionaLista)
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            @include('lista._equipo', ['equipo' => $partido->equipoLocal])
+                            @include('lista._equipo', ['equipo' => $partido->equipoVisita])
+                        </div>
+                    @elseif ($asistencias->has($miFicha->id))
+                        <p class="text-sm text-green-700">✅ Estás en la lista desde las {{ $asistencias[$miFicha->id]->created_at->format('H:i') }}.</p>
+                    @else
+                        <p class="text-sm text-gray-600">Aún no estás en la lista. En la cancha, escanea el QR que muestra el árbitro, el DT o la organización.</p>
+                    @endif
+                </div>
+            @endif
+
             {{-- Registrar gol --}}
             @can('create', [App\Models\Gol::class, $partido])
                 <div class="bg-white p-6 shadow-sm sm:rounded-lg">
@@ -199,13 +233,13 @@
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <optgroup label="{{ $partido->equipoLocal->nombre }}">
                                     @foreach ($partido->equipoLocal->jugadores as $j)
-                                        <option value="{{ $j->id }}">{{ $j->dorsal ? '#' . $j->dorsal . ' - ' : '' }}{{ $j->nombre }}</option>
+                                        <option value="{{ $j->id }}" @disabled($exigeLista && ! $asistencias->has($j->id))>{{ $j->dorsal ? '#' . $j->dorsal . ' - ' : '' }}{{ $j->nombre }}{{ $exigeLista && ! $asistencias->has($j->id) ? ' (sin lista)' : '' }}</option>
                                          
                                     @endforeach
                                 </optgroup>
                                 <optgroup label="{{ $partido->equipoVisita->nombre }}">
                                     @foreach ($partido->equipoVisita->jugadores as $j)
-                                        <option value="{{ $j->id }}">{{ $j->dorsal ? '#' . $j->dorsal . ' - ' : '' }}{{ $j->nombre }}</option>
+                                        <option value="{{ $j->id }}" @disabled($exigeLista && ! $asistencias->has($j->id))>{{ $j->dorsal ? '#' . $j->dorsal . ' - ' : '' }}{{ $j->nombre }}{{ $exigeLista && ! $asistencias->has($j->id) ? ' (sin lista)' : '' }}</option>
                                     @endforeach
                                 </optgroup>
                             </select>
@@ -244,12 +278,12 @@
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <optgroup label="{{ $partido->equipoLocal->nombre }}">
                                     @foreach ($partido->equipoLocal->jugadores as $j)
-                                        <option value="{{ $j->id }}">{{ $j->dorsal ? '#' . $j->dorsal . ' - ' : '' }}{{ $j->nombre }}</option>
+                                        <option value="{{ $j->id }}" @disabled($exigeLista && ! $asistencias->has($j->id))>{{ $j->dorsal ? '#' . $j->dorsal . ' - ' : '' }}{{ $j->nombre }}{{ $exigeLista && ! $asistencias->has($j->id) ? ' (sin lista)' : '' }}</option>
                                     @endforeach
                                 </optgroup>
                                 <optgroup label="{{ $partido->equipoVisita->nombre }}">
                                     @foreach ($partido->equipoVisita->jugadores as $j)
-                                        <option value="{{ $j->id }}">{{ $j->dorsal ? '#' . $j->dorsal . ' - ' : '' }}{{ $j->nombre }}</option>
+                                        <option value="{{ $j->id }}" @disabled($exigeLista && ! $asistencias->has($j->id))>{{ $j->dorsal ? '#' . $j->dorsal . ' - ' : '' }}{{ $j->nombre }}{{ $exigeLista && ! $asistencias->has($j->id) ? ' (sin lista)' : '' }}</option>
                                     @endforeach
                                 </optgroup>
                             </select>

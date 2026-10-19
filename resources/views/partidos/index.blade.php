@@ -75,6 +75,18 @@
                                         @endforeach
                                     </div>
 
+                                    {{-- Lista de asistencia de la fecha (QR) --}}
+                                    @if (\App\Support\LigaActual::liga()?->pedir_lista)
+                                        @foreach ($j['partidos']->groupBy('torneo_id') as $partidosTorneo)
+                                            @if (\App\Support\Lista::puedeGestionarFecha(auth()->user(), $partidosTorneo))
+                                                <a href="{{ route('lista.fecha', [$partidosTorneo->first()->torneo_id, $j['numero']]) }}"
+                                                   class="block border-t border-gray-100 px-5 py-3 text-sm font-medium text-indigo-600 hover:bg-gray-50 hover:text-indigo-800">
+                                                    📋 Lista y QR de la fecha {{ $j['numero'] }}{{ $j['partidos']->pluck('torneo_id')->unique()->count() > 1 ? ' · '.$partidosTorneo->first()->torneo->nombre : '' }}
+                                                </a>
+                                            @endif
+                                        @endforeach
+                                    @endif
+
                                     {{-- Eliminar la fecha completa (por torneo, por si una jornada mezcla torneos) --}}
                                     @if ($puedeBorrar)
                                         @foreach ($j['partidos']->groupBy('torneo_id') as $partidosTorneo)

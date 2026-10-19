@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Jugador;
 use App\Models\Partido;
+use App\Support\Lista;
 use App\Models\Tarjeta;
 use Illuminate\Http\Request;
 
@@ -27,6 +28,10 @@ class TarjetaController extends Controller
             422,
             'El jugador no pertenece a ninguno de los dos equipos del partido.'
         );
+
+        if (Lista::bloquea($partido, $jugador)) {
+            return back()->withErrors(['jugador_id' => "{$jugador->nombre} no está en la lista de asistencia: sin lista no puede jugar."]);
+        }
 
         Tarjeta::create([
             'partido_id' => $partido->id,

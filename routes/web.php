@@ -28,6 +28,7 @@ use App\Http\Controllers\CampeonatoPublicoController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\WebhookMercadoPagoController;
 use App\Http\Controllers\AdminCampeonatosController;
+use App\Http\Controllers\ListaController;
 
 
 // Registro por invitación a un equipo (público)
@@ -61,6 +62,9 @@ Route::middleware('auth')->group(function () {
 
     // Regreso desde Mercado Pago tras pagar el Pro (verifica el pago con Mercado Pago)
     Route::get('/configuracion/plan/retorno', [PlanController::class, 'retorno'])->name('campeonatos.plan.retorno');
+
+    // El jugador escanea el QR de la lista (puede estar en otro campeonato como actual)
+    Route::get('/lista/{token}', [ListaController::class, 'escanear'])->name('lista.escanear');
 });
 
 // Campeonato: solo quienes participan en algún torneo (admin, DT, jugador o árbitro).
@@ -87,6 +91,13 @@ Route::middleware(['auth', 'torneos'])->group(function () {
     Route::delete('/partidos/{partido}', [PartidoController::class, 'destroy'])->name('partidos.destroy');
     Route::delete('/torneos/{torneo}/fechas/{numero}', [PartidoController::class, 'destroyFecha'])
         ->whereNumber('numero')->name('partidos.fechas.destroy');
+
+    // Lista de asistencia por QR (un QR por fecha; también para imprimir)
+    Route::get('/torneos/{torneo}/fechas/{numero}/lista', [ListaController::class, 'fecha'])->whereNumber('numero')->name('lista.fecha');
+    Route::get('/torneos/{torneo}/fechas/{numero}/lista/imprimir', [ListaController::class, 'imprimir'])->whereNumber('numero')->name('lista.imprimir');
+    Route::post('/torneos/{torneo}/fechas/{numero}/lista/regenerar', [ListaController::class, 'regenerar'])->whereNumber('numero')->name('lista.regenerar');
+    Route::post('/partidos/{partido}/asistencia', [ListaController::class, 'marcar'])->name('lista.marcar');
+    Route::delete('/partidos/{partido}/asistencia/{jugador}', [ListaController::class, 'desmarcar'])->name('lista.desmarcar');
     Route::post('/partidos/{partido}/programacion', [PartidoController::class, 'actualizarProgramacion'])->name('partidos.actualizarProgramacion');
     Route::get('/equipos/{equipo}/alineacion', [App\Http\Controllers\AlineacionController::class, 'equipo'])->name('equipos.alineacion');
     // Partidos: acciones del árbitro y asignación
@@ -138,6 +149,7 @@ Route::get('/configuracion/campeonato', [CampeonatoController::class, 'edit'])->
 Route::get('/configuracion/plan', [PlanController::class, 'show'])->name('campeonatos.plan');
 Route::post('/configuracion/plan/pagar', [PlanController::class, 'pagar'])->name('campeonatos.plan.pagar');
 Route::put('/configuracion/campeonato', [CampeonatoController::class, 'update'])->name('campeonatos.update');
+Route::put('/configuracion/lista', [ListaController::class, 'configurar'])->name('campeonatos.lista');
 Route::get('/jugadores', [JugadorController::class, 'index'])->name('jugadores.index');
 
 // Canchas (CRUD, solo admin)

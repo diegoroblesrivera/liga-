@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Gol;
 use App\Models\Jugador;
 use App\Models\Partido;
+use App\Support\Lista;
 use Illuminate\Http\Request;
 
 class GolController extends Controller
@@ -29,6 +30,10 @@ class GolController extends Controller
             422,
             'El jugador no pertenece a este partido.'
         );
+
+        if (Lista::bloquea($partido, $jugador)) {
+            return back()->withErrors(['jugador_id' => "{$jugador->nombre} no está en la lista de asistencia: sin lista no puede jugar."]);
+        }
 
         // Normal/penal suma al equipo del jugador; el autogol suma al rival.
         $equipoId = $data['tipo'] === 'autogol'

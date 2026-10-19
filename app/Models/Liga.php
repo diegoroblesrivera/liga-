@@ -13,13 +13,21 @@ class Liga extends Model
 {
     protected $table = 'ligas';
 
-    protected $fillable = ['nombre', 'slug', 'descripcion', 'logo', 'owner_id', 'activa', 'publica', 'pro_hasta'];
+    protected $fillable = ['nombre', 'slug', 'descripcion', 'logo', 'owner_id', 'activa', 'publica', 'pro_hasta', 'pedir_lista', 'lista_obligatoria'];
 
     protected $casts = [
         'activa' => 'boolean',
         'publica' => 'boolean',
         'pro_hasta' => 'datetime',
+        'pedir_lista' => 'boolean',
+        'lista_obligatoria' => 'boolean',
     ];
+
+    // Lista de asistencia activada y obligatoria: sin asistencia no se juega.
+    public function exigeLista(): bool
+    {
+        return $this->pedir_lista && $this->lista_obligatoria;
+    }
 
     // Plan Gratis: hasta 8 equipos, todas las funciones. Pro: equipos ilimitados.
     public const EQUIPOS_PLAN_GRATIS = 8;

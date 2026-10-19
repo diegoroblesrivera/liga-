@@ -29,6 +29,35 @@
                     </div>
                 </form>
             </div>
+
+            {{-- Lista de asistencia por QR --}}
+            <div class="bg-white p-6 shadow-sm sm:rounded-lg" x-data="{ pedir: {{ $liga->pedir_lista ? 'true' : 'false' }} }">
+                <h3 class="text-base font-medium text-gray-900">📋 Lista de asistencia</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    Cada fecha tiene un QR que los jugadores escanean en la cancha para quedar presentes.
+                    Lo muestran el árbitro, los DT o la organización, y se puede imprimir para la mesa.
+                </p>
+                <form method="POST" action="{{ route('campeonatos.lista') }}" class="mt-4 space-y-3">
+                    @csrf
+                    @method('PUT')
+                    <label class="flex items-start gap-3 text-sm">
+                        <input type="checkbox" name="pedir_lista" value="1" x-model="pedir"
+                               class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                        <span><span class="font-medium text-gray-900">Pedir lista</span> en los partidos de este campeonato</span>
+                    </label>
+                    <label class="flex items-start gap-3 text-sm" :class="pedir ? '' : 'opacity-50'">
+                        <input type="checkbox" name="lista_obligatoria" value="1" @checked($liga->lista_obligatoria) :disabled="! pedir"
+                               class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                        <span>
+                            <span class="font-medium text-gray-900">Si no presenta la asistencia, no puede jugar</span>
+                            <span class="block text-xs text-gray-500">Quien no esté en la lista no aparece para goles ni tarjetas. El DT, el árbitro o la organización pueden marcarlo a mano.</span>
+                        </span>
+                    </label>
+                    <div class="flex justify-end">
+                        <x-primary-button>Guardar lista</x-primary-button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </x-app-layout>

@@ -63,6 +63,11 @@ class Partido extends Model
         return $this->hasMany(Gol::class);
     }
 
+    public function asistencias(): HasMany
+    {
+        return $this->hasMany(Asistencia::class);
+    }
+
     // --- Estado del ciclo de vida ---
 
     public function estaProgramado(): bool
