@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Liga;
 use App\Models\Partido;
 use App\Models\Torneo;
-use App\Support\CachePublico;
 use App\Support\LigaActual;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -24,14 +23,6 @@ class CampeonatoPublicoController extends Controller
     }
 
     protected function pagina(Request $request, Liga $liga)
-    {
-        // Mismos datos para todos los visitantes: se guardan hasta que cambie un resultado.
-        $datos = CachePublico::liga($liga->id, 'pagina:'.(int) $request->query('torneo'), fn () => $this->datos($request));
-
-        return view('campeonatos.publico', ['liga' => $liga] + $datos)->render();
-    }
-
-    protected function datos(Request $request): array
     {
         $torneos = Torneo::orderByDesc('id')->get();
 
@@ -71,7 +62,7 @@ class CampeonatoPublicoController extends Controller
             }
         }
 
-        return compact('torneos', 'torneo', 'posiciones', 'goleadores', 'jornadas', 'indiceInicial');
+        return view('campeonatos.publico', compact('liga', 'torneos', 'torneo', 'posiciones', 'goleadores', 'jornadas', 'indiceInicial'))->render();
     }
 
     /**

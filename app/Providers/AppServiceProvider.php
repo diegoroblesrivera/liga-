@@ -28,6 +28,5 @@ class AppServiceProvider extends ServiceProvider
         });
 
         \App\Support\Logros\Disparadores::registrar();
-        \App\Support\CachePublico::registrar();
     }
 }
