@@ -5,6 +5,9 @@
 
     <div class="py-8">
         <div class="mx-auto max-w-xl sm:px-6 lg:px-8">
+            @if (session('status'))
+                <div class="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-700">{{ session('status') }}</div>
+            @endif
             <div class="bg-white p-6 shadow-sm sm:rounded-lg">
                 <p class="mb-4 text-sm text-gray-500">Equipo: {{ $jugador->equipo->nombre }}</p>
 

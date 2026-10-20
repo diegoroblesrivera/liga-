@@ -31,11 +31,13 @@ use App\Http\Controllers\AdminCampeonatosController;
 use App\Http\Controllers\ListaController;
 use App\Http\Controllers\LogroController;
 use App\Http\Controllers\AdminMetricasController;
+use App\Http\Controllers\CargaMasivaController;
 
 
 // Registro por invitación a un equipo (público)
 Route::get('/invitacion/{token}', [InscripcionController::class, 'show'])->name('invitacion.show');
-Route::post('/invitacion/{token}', [InscripcionController::class, 'store'])->name('invitacion.store');
+Route::post('/invitacion/{token}', [InscripcionController::class, 'store'])->middleware('guest')->name('invitacion.store');
+Route::post('/invitacion/{token}/aceptar', [InscripcionController::class, 'aceptar'])->middleware('auth')->name('invitacion.aceptar');
 
 
 Route::get('/',[HomeController::class, 'index'])->name('home');
@@ -77,6 +79,14 @@ Route::middleware(['auth', 'torneos'])->group(function () {
     // Equipos
     Route::get('/equipos', [EquipoController::class, 'index'])->name('equipos.index');
     Route::get('/equipos/crear', [EquipoController::class, 'create'])->name('equipos.create');
+    // Carga masiva por Excel: equipos con su DT (organizador) y plantel (DT)
+    Route::get('/equipos/importar', [CargaMasivaController::class, 'equipos'])->name('carga.equipos');
+    Route::get('/equipos/importar/plantilla', [CargaMasivaController::class, 'plantillaEquipos'])->name('carga.equipos.plantilla');
+    Route::post('/equipos/importar', [CargaMasivaController::class, 'importarEquipos'])->name('carga.equipos.importar');
+    Route::get('/equipos/{equipo}/importar-jugadores', [CargaMasivaController::class, 'jugadores'])->name('carga.jugadores');
+    Route::get('/equipos/{equipo}/importar-jugadores/plantilla', [CargaMasivaController::class, 'plantillaJugadores'])->name('carga.jugadores.plantilla');
+    Route::post('/equipos/{equipo}/importar-jugadores', [CargaMasivaController::class, 'importarJugadores'])->name('carga.jugadores.importar');
+    Route::post('/invitaciones/{invitacion}/reenviar', [CargaMasivaController::class, 'reenviar'])->name('invitaciones.reenviar');
     Route::post('/equipos', [EquipoController::class, 'store'])->name('equipos.store');
     Route::get('/equipos/{equipo}', [EquipoController::class, 'show'])->name('equipos.show');
     Route::get('/equipos/{equipo}/editar', [EquipoController::class, 'edit'])->name('equipos.edit');

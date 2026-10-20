@@ -12,6 +12,10 @@
                             {{ $equipos->count() }}/{{ \App\Models\Liga::EQUIPOS_PLAN_GRATIS }} equipos · Gratis
                         </a>
                     @endunless
+                    <a href="{{ route('carga.equipos') }}"
+                       class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        📥 Cargar Excel
+                    </a>
                     <a href="{{ route('equipos.create') }}"
                        class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
                         Crear equipo

@@ -115,12 +115,38 @@
                         </form>
                     @endcan
 
+                    @can('create', [App\Models\Jugador::class, $equipo])
+                        <a href="{{ route('carga.jugadores', $equipo) }}"
+                           class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 hover:bg-gray-50">
+                            📥 Cargar jugadores desde Excel
+                        </a>
+                    @endcan
+
                     @cannot('create', [App\Models\Invitacion::class, $equipo, 'jugador'])
                         @cannot('create', [App\Models\Invitacion::class, $equipo, 'dt'])
                             <p class="text-sm text-gray-500">No tienes permisos para generar invitaciones de este equipo.</p>
                         @endcannot
                     @endcannot
                 </div>
+
+                {{-- Invitaciones por correo pendientes (carga masiva) --}}
+                @if ($equipo->invitaciones->filter(fn ($i) => $i->email && $i->esValida() && $yo?->can('delete', $i))->isNotEmpty())
+                    <div class="mt-5 border-t border-gray-100 pt-4">
+                        <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Invitaciones enviadas sin aceptar</p>
+                        @foreach ($equipo->invitaciones->filter(fn ($i) => $i->email && $i->esValida() && $yo?->can('delete', $i)) as $inv)
+                            <div class="flex flex-wrap items-center justify-between gap-2 py-1.5 text-sm">
+                                <span class="text-gray-700">
+                                    {{ $inv->tipo === 'dt' ? 'DT' : 'Jugador' }} · {{ $inv->nombre ?? $inv->email }}
+                                    <span class="text-xs text-gray-400">{{ $inv->email }}{{ $inv->telefono ? ' · '.$inv->telefono : '' }}{{ $inv->enviada_en ? ' · enviada '.$inv->enviada_en->format('d/m H:i') : ' · sin enviar' }}</span>
+                                </span>
+                                <form method="POST" action="{{ route('invitaciones.reenviar', $inv) }}">
+                                    @csrf
+                                    <button type="submit" class="text-xs font-medium text-indigo-600 hover:text-indigo-800">Reenviar correo</button>
+                                </form>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
 
             {{-- Plantel con edición y baja --}}

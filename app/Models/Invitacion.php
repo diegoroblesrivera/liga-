@@ -13,19 +13,26 @@ class Invitacion extends Model
     protected $table = 'invitaciones';
 
     protected $fillable = [
-        'equipo_id', 'tipo', 'token', 'email',
-        'reutilizable', 'usos', 'expira_en', 'creada_por',
+        'equipo_id', 'jugador_id', 'tipo', 'token', 'email', 'nombre', 'telefono',
+        'reutilizable', 'usos', 'expira_en', 'enviada_en', 'creada_por',
     ];
 
     protected $casts = [
         'reutilizable' => 'boolean',
         'usos' => 'integer',
         'expira_en' => 'datetime',
+        'enviada_en' => 'datetime',
     ];
 
     public function equipo(): BelongsTo
     {
         return $this->belongsTo(Equipo::class);
+    }
+
+    // Ficha ya cargada (carga masiva) que el jugador reclama al aceptar.
+    public function jugador(): BelongsTo
+    {
+        return $this->belongsTo(Jugador::class)->withoutGlobalScopes();
     }
 
     public function creador(): BelongsTo
