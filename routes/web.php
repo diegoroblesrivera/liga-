@@ -30,6 +30,7 @@ use App\Http\Controllers\WebhookMercadoPagoController;
 use App\Http\Controllers\AdminCampeonatosController;
 use App\Http\Controllers\ListaController;
 use App\Http\Controllers\LogroController;
+use App\Http\Controllers\AdminMetricasController;
 
 
 // Registro por invitación a un equipo (público)
@@ -211,6 +212,7 @@ Route::post('/webhooks/mercadopago', WebhookMercadoPagoController::class)->name(
 
 // Panel interno del super admin
 Route::middleware(['auth', 'superadmin'])->prefix('admin')->group(function () {
+    Route::get('/metricas', [AdminMetricasController::class, 'index'])->name('admin.metricas');
     Route::get('/campeonatos', [AdminCampeonatosController::class, 'index'])->name('admin.campeonatos');
     Route::post('/campeonatos/{liga}/pro', [AdminCampeonatosController::class, 'activarPro'])->name('admin.campeonatos.pro');
     Route::delete('/campeonatos/{liga}/pro', [AdminCampeonatosController::class, 'quitarPro'])->name('admin.campeonatos.pro.quitar');

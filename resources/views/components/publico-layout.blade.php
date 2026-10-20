@@ -6,6 +6,7 @@
     <title>{{ $title ?? config('app.name', 'Liga') }}</title>
     @include('layouts._fuentes')
     @include('layouts._pwa')
+    @include('layouts._analitica')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="flex min-h-screen flex-col bg-gray-100 font-sans text-gray-900 antialiased">

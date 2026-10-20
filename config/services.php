@@ -34,6 +34,9 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
 
+    // Cloudflare Web Analytics: visitas sin cookies. El token es público (va en la página).
+    'cloudflare_analytics' => env('CF_ANALYTICS_TOKEN'),
+
     // Pago del plan Pro (Checkout Pro). Credenciales de prueba: access token que empieza con TEST-.
     'mercadopago' => [
         'access_token' => env('MP_ACCESS_TOKEN'),

@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">Panel TuTorneo · Campeonatos</h2>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">Panel TuTorneo · Campeonatos</h2>
+            <a href="{{ route('admin.metricas') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">📊 Métricas →</a>
+        </div>
     </x-slot>
 
     <div class="py-8">

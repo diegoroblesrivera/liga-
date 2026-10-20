@@ -115,7 +115,7 @@
                         <x-dropdown-link :href="route('logros.mios')">🏅 Mis logros</x-dropdown-link>
 
                         @if (auth()->user()->is_super_admin)
-                            <x-dropdown-link :href="route('admin.campeonatos')">Panel TuTorneo</x-dropdown-link>
+                            <x-dropdown-link :href="route('admin.metricas')">📊 Panel TuTorneo</x-dropdown-link>
                         @endif
 
                         <!-- Authentication -->

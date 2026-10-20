@@ -10,6 +10,7 @@
         @include('layouts._fuentes')
 
         @include('layouts._pwa')
+        @include('layouts._analitica')
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

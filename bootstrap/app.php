@@ -26,6 +26,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         // el equipo sin filtro y se podría abrir uno de otro campeonato.
         $middleware->web(append: [
             \App\Http\Middleware\ResolverLigaActual::class,
+            \App\Http\Middleware\RegistrarActividad::class,
         ]);
         $middleware->prependToPriorityList(
             before: \Illuminate\Routing\Middleware\SubstituteBindings::class,

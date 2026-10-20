@@ -85,12 +85,12 @@
             <li><strong>Google</strong>: solo si eliges iniciar sesión con Google.</li>
             <li><strong>Brevo</strong>: envío de los correos del servicio; recibe tu correo y el contenido del mensaje.</li>
             <li><strong>Bunny Fonts</strong>: tipografías del sitio; recibe tu dirección IP al cargar la página.</li>
-            <li><strong>Cloudflare</strong>: gestiona el dominio {{ $dominio }} y reenvía los correos a {{ $correo }}; no recibe el tráfico del sitio.</li>
+            <li><strong>Cloudflare</strong>: gestiona el dominio {{ $dominio }}, reenvía los correos a {{ $correo }} y mide las visitas de forma agregada (páginas vistas, país y tipo de dispositivo), sin cookies y sin identificarte.</li>
         </ul>
         <p>Algunos de estos proveedores tratan datos fuera de Chile. Solo trabajamos con proveedores que ofrecen protecciones adecuadas para esos datos.</p>
 
         <h2>Cookies</h2>
-        <p>Usamos solo las cookies necesarias para que inicies sesión y el sitio sea seguro. No usamos cookies de publicidad ni de analítica.</p>
+        <p>Usamos solo las cookies necesarias para que inicies sesión y el sitio sea seguro. No usamos cookies de publicidad ni de analítica: la medición de visitas no usa cookies.</p>
         <ul>
             <li><strong>Sesión</strong>: mantiene tu sesión abierta mientras navegas (2 horas sin actividad).</li>
             <li><strong>XSRF-TOKEN</strong>: protege los formularios contra envíos falsificados (2 horas).</li>
