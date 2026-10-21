@@ -68,6 +68,17 @@ class FormatosTorneoTest extends TestCase
         $this->assertCount(10, Generador::roundRobin([1, 2, 3, 4, 5], true));
     }
 
+    public function test_el_asistente_muestra_los_diagramas_de_cada_formato(): void
+    {
+        $this->equipos(4);
+
+        $this->actingAs($this->admin)->get(route('fixtures.create'))->assertOk()
+            ->assertSee('Así se juega')
+            ->assertSee('aria-label="Todos contra todos: cada equipo juega con todos los demás"', false)
+            ->assertSee('aria-label="Grupos que juegan todos contra todos y luego play offs"', false)
+            ->assertSee('aria-label="Eliminación directa: equipos a la izquierda y a la derecha, la copa al medio"', false);
+    }
+
     public function test_liga_de_una_rueda_y_de_ida_y_vuelta(): void
     {
         $this->equipos(6);

@@ -86,6 +86,8 @@
                         </label>
                     </div>
 
+                    @include('fixtures._diagramas')
+
                     {{-- Opciones: liga y grupos --}}
                     <label class="flex items-center gap-2 text-sm text-gray-700" x-show="tipo !== 'eliminacion'">
                         <input type="checkbox" name="ida_vuelta" value="1" @checked(old('ida_vuelta')) class="rounded border-gray-300 text-indigo-600">
