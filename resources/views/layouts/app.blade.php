@@ -16,8 +16,17 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="flex min-h-screen flex-col bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
+        @php
+            // Menú lateral en pantallas grandes para quien tiene muchas opciones (hoy: super admin).
+            $menuLateral = (bool) auth()->user()?->is_super_admin;
+        @endphp
+        @if ($menuLateral)
+            @include('layouts.sidebar')
+        @endif
+        <div class="flex min-h-screen flex-col bg-gray-100 dark:bg-gray-900 {{ $menuLateral ? 'lg:pl-64' : '' }}">
+            <div class="{{ $menuLateral ? 'lg:hidden' : '' }}">
+                @include('layouts.navigation')
+            </div>
 
             <!-- Page Heading -->
             @isset($header)
