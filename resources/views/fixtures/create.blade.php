@@ -25,6 +25,25 @@
                 elegirEtapas(n) { this.etapas = n; if (n === 1 && this.tipo === 'grupos') this.tipo = 'liga'; if (n === 2 && this.tipo === 'eliminacion') this.tipo = 'liga'; },
              }">
 
+            {{-- El torneo se arma con los equipos ya creados --}}
+            @if ($total < 2)
+                <div class="mb-4 rounded-lg bg-amber-50 p-5 text-sm text-amber-900 ring-1 ring-amber-200">
+                    <p class="font-semibold">Primero crea los equipos</p>
+                    <p class="mt-1">El torneo se arma con los equipos del campeonato y todavía {{ $total ? 'hay solo 1' : 'no hay ninguno' }}. Créalos uno a uno o cárgalos todos desde un Excel.</p>
+                    <div class="mt-3 flex flex-wrap gap-3">
+                        <a href="{{ route('equipos.index') }}" class="rounded-md bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700">Ir a Equipos</a>
+                        <a href="{{ route('carga.equipos') }}" class="rounded-md border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 hover:bg-gray-50">📥 Cargar equipos desde Excel</a>
+                    </div>
+                </div>
+            @else
+                <div class="mb-4 rounded-lg bg-indigo-50 p-4 text-sm text-gray-700 ring-1 ring-indigo-100">
+                    ℹ️ <strong>Antes de crear el torneo, todos los equipos deben estar creados en
+                    <a href="{{ route('equipos.index') }}" class="font-semibold text-indigo-700 underline hover:text-indigo-900">Equipos</a>.</strong>
+                    Hoy hay <strong>{{ $total }} equipos</strong>: el torneo los usa todos{{ ' ' }}<span class="text-gray-500">(en eliminación directa eliges cuáles)</span>.
+                    Si falta alguno, créalo primero o <a href="{{ route('carga.equipos') }}" class="font-medium text-indigo-700 underline hover:text-indigo-900">cárgalos desde un Excel</a>.
+                </div>
+            @endif
+
             @if ($errors->any())
                 <div class="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
                     @foreach ($errors->all() as $error)
@@ -33,7 +52,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('fixtures.store') }}" class="space-y-5">
+            <form method="POST" action="{{ route('fixtures.store') }}" class="space-y-5 {{ $total < 2 ? 'pointer-events-none opacity-40' : '' }}">
                 @csrf
                 <input type="hidden" name="etapas" :value="etapas">
 

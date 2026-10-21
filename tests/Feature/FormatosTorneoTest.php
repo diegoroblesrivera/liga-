@@ -76,7 +76,15 @@ class FormatosTorneoTest extends TestCase
             ->assertSee('Así se juega')
             ->assertSee('aria-label="Todos contra todos: cada equipo juega con todos los demás"', false)
             ->assertSee('aria-label="Grupos que juegan todos contra todos y luego play offs"', false)
-            ->assertSee('aria-label="Eliminación directa: equipos a la izquierda y a la derecha, la copa al medio"', false);
+            ->assertSee('aria-label="Eliminación directa: equipos a la izquierda y a la derecha, la copa al medio"', false)
+            ->assertSeeText('todos los equipos deben estar creados en Equipos')
+            ->assertSeeText('Hoy hay 4 equipos');
+    }
+
+    public function test_sin_equipos_pide_crearlos_primero(): void
+    {
+        $this->actingAs($this->admin)->get(route('fixtures.create'))->assertOk()
+            ->assertSee('Primero crea los equipos')->assertSee(route('equipos.index'), false)->assertSee(route('carga.equipos'), false);
     }
 
     public function test_liga_de_una_rueda_y_de_ida_y_vuelta(): void
