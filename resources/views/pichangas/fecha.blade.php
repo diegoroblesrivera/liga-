@@ -79,6 +79,7 @@
                         <button type="button" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                                 @click="navigator.clipboard.writeText($refs.lista.innerText); copiado = true; setTimeout(() => copiado = false, 2000)"
                                 x-text="copiado ? '¡Copiada!' : 'Copiar lista'">Copiar lista</button>
+                        <x-whatsapp etiqueta="Enviar por WhatsApp" x-on:click.prevent="window.open('https://wa.me/?text=' + encodeURIComponent($refs.lista.innerText), '_blank')" />
                     </div>
 
                     @if ($sinRun->isNotEmpty())

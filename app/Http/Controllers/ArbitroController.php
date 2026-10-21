@@ -33,6 +33,9 @@ class ArbitroController extends Controller
             'creada_por' => $request->user()->id,
         ]);
 
-        return back()->with('link_invitacion', route('invitacion.show', $invitacion->token));
+        $link = route('invitacion.show', $invitacion->token);
+        $mensaje = 'Te invito a ser árbitro del campeonato *'.\App\Support\LigaActual::liga()?->nombre.'* en '.config('app.name').". Regístrate aquí: {$link}";
+
+        return back()->with('link_invitacion', $link)->with('mensaje_invitacion', $mensaje);
     }
 }

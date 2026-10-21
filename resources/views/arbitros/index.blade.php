@@ -31,6 +31,7 @@
                                 class="shrink-0 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700">
                             Copiar
                         </button>
+                        <x-whatsapp :texto="session('mensaje_invitacion', session('link_invitacion'))" />
                     </div>
                 </div>
             @endif

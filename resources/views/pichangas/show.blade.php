@@ -214,6 +214,7 @@
                         <button type="button" class="shrink-0 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                                 @click="navigator.clipboard.writeText($refs.link.value); copiado = true; setTimeout(() => copiado = false, 2000)"
                                 x-text="copiado ? '¡Copiado!' : 'Copiar'">Copiar</button>
+                        <x-whatsapp :texto="'⚽ ¡Juguemos! Súmate a la pichanga *'.$pichanga->nombre.'*'.($pichanga->lugar ? ' en '.$pichanga->lugar : '').' en '.config('app.name').': '.route('pichangas.unirse', $pichanga->token)" />
                     </div>
                 </div>
             @endif

@@ -32,7 +32,13 @@ class InvitacionController extends Controller
             'creada_por' => $request->user()->id,
         ]);
 
-        return back()->with('link_invitacion', route('invitacion.show', $invitacion->token));
+        $link = route('invitacion.show', $invitacion->token);
+        $liga = \App\Support\LigaActual::liga()?->nombre;
+        $mensaje = $data['tipo'] === 'dt'
+            ? "¡Hola! Te invito a ser DT de *{$equipo->nombre}* en el campeonato *{$liga}* en ".config('app.name').". Inscríbete aquí: {$link}"
+            : "⚽ ¡Súmate al plantel de *{$equipo->nombre}* ({$liga}) en ".config('app.name')."! Inscríbete aquí: {$link}";
+
+        return back()->with('link_invitacion', $link)->with('mensaje_invitacion', $mensaje);
     }
 
     // Revocar una invitación (admin siempre; DT solo las de jugador de su equipo).
