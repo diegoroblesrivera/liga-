@@ -28,5 +28,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         \App\Support\Logros\Disparadores::registrar();
+
+        // Eliminación directa: al definirse una llave, se crea la ronda siguiente.
+        \App\Models\Partido::saved(function (\App\Models\Partido $p) {
+            if ($p->etapa_id && $p->ronda && $p->estaFinalizado() && $p->wasChanged(['estado', 'penales_local', 'penales_visita'])) {
+                \App\Support\Torneos\Formato::avanzar(\App\Models\Etapa::withoutGlobalScopes()->findOrFail($p->etapa_id));
+            }
+        });
     }
 }

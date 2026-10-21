@@ -166,19 +166,32 @@ class PartidoController extends Controller
         return back()->with('status', 'Partido iniciado. Ya puedes cargar goles.');
     }
 
-    public function finalizar(Partido $partido)
+    public function finalizar(Request $request, Partido $partido)
     {
         $this->authorize('finalizar', $partido);
 
         $local = $partido->goles->where('equipo_id', $partido->equipo_local_id)->count();
         $visita = $partido->goles->where('equipo_id', $partido->equipo_visita_id)->count();
+        $penales = ['penales_local' => null, 'penales_visita' => null];
+
+        // Eliminación directa: si empatan, se define a penales (no puede quedar empate).
+        if ($partido->esEliminacion() && $local === $visita) {
+            $penales = $request->validate([
+                'penales_local' => ['required', 'integer', 'min:0', 'max:50'],
+                'penales_visita' => ['required', 'integer', 'min:0', 'max:50', 'different:penales_local'],
+            ], [
+                'penales_local.required' => 'El partido terminó empatado: anota el resultado de los penales.',
+                'penales_visita.required' => 'El partido terminó empatado: anota el resultado de los penales.',
+                'penales_visita.different' => 'Los penales no pueden terminar empatados.',
+            ]);
+        }
 
         $partido->update([
             'estado' => 'finalizado',
             'finalizado_en' => now(),
             'goles_local' => $local,
             'goles_visita' => $visita,
-        ]);
+        ] + $penales);
 
         return redirect()->route('partidos.show', $partido)
             ->with('status', 'Partido finalizado. El resultado quedó registrado.');

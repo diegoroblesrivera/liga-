@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Models\Logro;
 use App\Models\Partido;
+use App\Models\Torneo;
 use App\Support\Logros\Catalogo;
+use App\Support\Torneos\Tabla;
 use Closure;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -257,12 +259,20 @@ class Logros
         if ($torneo->cerrado_en && $cerrado($partidos)) {
             $fin = $cuando($partidos);
 
-            // Campeón: primero de la tabla (pts, diferencia, goles a favor); empate total = todos.
-            $tabla = DB::table('vista_posiciones')->where('torneo_id', $torneoId)
-                ->orderByDesc('pts')->orderByDesc('dif')->orderByDesc('gf')->get();
-            if ($primero = $tabla->first()) {
-                $campeones = $tabla->filter(fn ($f) => $f->pts == $primero->pts && $f->dif == $primero->dif && $f->gf == $primero->gf);
-                foreach (DB::table('jugadores')->whereIn('equipo_id', $campeones->pluck('equipo_id'))->where('activo', true)->pluck('id') as $id) {
+            // Campeón: con llave, el ganador de la final. Si no, el primero de la tabla
+            // (pts, diferencia, goles a favor); empate total = todos.
+            $final = Partido::withoutGlobalScopes()->where('torneo_id', $torneoId)->where('ronda', 'final')->where('estado', 'finalizado')->first();
+            if ($final) {
+                $campeones = collect([$final->ganadorId()])->filter();
+            } else {
+                $tabla = Tabla::delTorneo(Torneo::withoutGlobalScopes()->findOrFail($torneoId));
+                $primero = $tabla->first();
+                $campeones = $primero && $primero->pj > 0
+                    ? $tabla->filter(fn ($f) => $f->pts == $primero->pts && $f->dif == $primero->dif && $f->gf == $primero->gf)->pluck('equipo_id')
+                    : collect();
+            }
+            if ($campeones->isNotEmpty()) {
+                foreach (DB::table('jugadores')->whereIn('equipo_id', $campeones)->where('activo', true)->pluck('id') as $id) {
                     $otorgar('campeon', $id, $fin);
                 }
             }

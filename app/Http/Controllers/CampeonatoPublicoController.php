@@ -6,6 +6,8 @@ use App\Models\Liga;
 use App\Models\Partido;
 use App\Models\Torneo;
 use App\Support\LigaActual;
+use App\Support\Torneos\Tabla;
+use App\Support\Torneos\Vista;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -31,15 +33,15 @@ class CampeonatoPublicoController extends Controller
             : $torneos->first();
 
         $posiciones = collect();
+        $secciones = [];
         $goleadores = collect();
         $jornadas = collect();
         $indiceInicial = 0;
 
         if ($torneo) {
-            $posiciones = DB::table('vista_posiciones')
-                ->where('torneo_id', $torneo->id)
-                ->orderByDesc('pts')->orderByDesc('dif')->orderByDesc('gf')
-                ->get();
+            $posiciones = Tabla::delTorneo($torneo);
+            // Torneos con grupos o llaves: tablas por grupo y la llave.
+            $secciones = $torneo->etapas()->exists() ? Vista::secciones($torneo) : [];
 
             $goleadores = DB::table('vista_goleadores')
                 ->where('torneo_id', $torneo->id)
@@ -62,7 +64,7 @@ class CampeonatoPublicoController extends Controller
             }
         }
 
-        return view('campeonatos.publico', compact('liga', 'torneos', 'torneo', 'posiciones', 'goleadores', 'jornadas', 'indiceInicial'))->render();
+        return view('campeonatos.publico', compact('liga', 'torneos', 'torneo', 'posiciones', 'secciones', 'goleadores', 'jornadas', 'indiceInicial'))->render();
     }
 
     /**

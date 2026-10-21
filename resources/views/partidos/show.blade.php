@@ -162,7 +162,7 @@
 
             {{-- Marcador --}}
             <div class="bg-white p-6 text-center shadow-sm sm:rounded-lg">
-                <div class="text-sm text-gray-500">Fecha {{ $partido->numero_fecha }} · {{ $partido->torneo->nombre }}</div>
+                <div class="text-sm text-gray-500">{{ $partido->etiqueta() }} · {{ $partido->torneo->nombre }}</div>
                 <div class="mt-4 flex items-center justify-center gap-6">
                     <span class="text-lg font-medium text-gray-900">{{ $partido->equipoLocal->nombre }}</span>
                     @if ($partido->estaProgramado())
@@ -172,6 +172,9 @@
                     @endif
                     <span class="text-lg font-medium text-gray-900">{{ $partido->equipoVisita->nombre }}</span>
                 </div>
+                @if ($partido->penales_local !== null)
+                    <div class="mt-1 text-sm font-medium text-gray-700">Penales: {{ $partido->penales_local }} - {{ $partido->penales_visita }}</div>
+                @endif
                 <div class="mt-3 text-sm font-medium text-gray-600">
                     {{ ucfirst(str_replace('_', ' ', $partido->estado)) }}
                 </div>
@@ -188,6 +191,18 @@
                         <form method="POST" action="{{ route('partidos.finalizar', $partido) }}"
                               onsubmit="return confirm('Al finalizar, el resultado se congela y no podrás editar los goles. ¿Continuar?')">
                             @csrf
+                            @if ($partido->esEliminacion() && $golesLocal === $golesVisita)
+                                <div class="mb-3 rounded-md bg-amber-50 p-3 text-left text-sm text-amber-900">
+                                    <p class="font-medium">Empate en eliminación directa: anota los penales.</p>
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <span class="text-xs">{{ $partido->equipoLocal->nombre }}</span>
+                                        <input type="number" name="penales_local" min="0" max="50" required value="{{ old('penales_local') }}" class="w-16 rounded-md border-gray-300 py-1 text-center text-sm">
+                                        <span>-</span>
+                                        <input type="number" name="penales_visita" min="0" max="50" required value="{{ old('penales_visita') }}" class="w-16 rounded-md border-gray-300 py-1 text-center text-sm">
+                                        <span class="text-xs">{{ $partido->equipoVisita->nombre }}</span>
+                                    </div>
+                                </div>
+                            @endif
                             <x-primary-button>Finalizar partido</x-primary-button>
                         </form>
                     @endcan
@@ -329,7 +344,7 @@
                     </div>
                     <div>
                         <dt class="text-gray-500">Jornada</dt>
-                        <dd class="text-gray-900">Fecha {{ $partido->numero_fecha }}</dd>
+                        <dd class="text-gray-900">{{ $partido->etiqueta() }}</dd>
                     </div>
                 </dl>
             </div>

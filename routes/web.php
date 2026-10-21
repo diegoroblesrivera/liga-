@@ -152,6 +152,7 @@ Route::get('/pagos/exportar/pdf', [PagoPartidoController::class, 'exportarPdf'])
     // Fixture automático
     Route::get('/fixture/generar', [FixtureController::class, 'create'])->name('fixtures.create');
     Route::post('/fixture/generar', [FixtureController::class, 'store'])->name('fixtures.store');
+    Route::post('/torneos/{torneo}/segunda-etapa', [FixtureController::class, 'segundaEtapa'])->name('fixtures.segunda');
     // Route::get('/fixture', [FixtureController::class, 'index'])->name('partidos.index');
 
     // Tablas

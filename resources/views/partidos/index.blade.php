@@ -7,7 +7,7 @@
                 <div class="flex items-center gap-3">
                     <a href="{{ route('fixtures.create') }}"
                        class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        Generar fixture
+                        Crear torneo
                     </a>
                     <a href="{{ route('partidos.create') }}"
                        class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
@@ -53,7 +53,7 @@
                     <div class="jr-vp">
                         <div class="jr-track" id="jr-track">
                             @foreach ($jornadas as $j)
-                                <div class="jr-slide" data-numero="{{ $j['numero'] }}">
+                                <div class="jr-slide" data-numero="{{ $j['numero'] }}" data-titulo="{{ $j['partidos']->first()?->ronda ? $j['partidos']->sortByDesc(fn ($x) => $x->ronda === 'final')->first()->etiqueta() : 'Fecha '.$j['numero'] }}">
                                     <div class="divide-y divide-gray-100">
                                         @foreach ($j['partidos'] as $partido)
                                             <a href="{{ route('partidos.show', $partido) }}"
@@ -69,6 +69,8 @@
                                                 </div>
                                                 <div class="mt-1 text-xs text-gray-500">
                                                     {{ $partido->fecha_hora?->format('d/m/Y H:i') ?? 'Sin fecha' }}
+                                                    @if ($partido->grupo) &middot; Grupo {{ $partido->grupo }} @endif
+                                                    @if ($partido->ronda === 'tercer_lugar') &middot; Tercer lugar @endif
                                                     @if ($partido->cancha) &middot; {{ $partido->cancha->nombre }} @endif
                                                 </div>
                                             </a>
@@ -147,7 +149,7 @@
 
             function encabezado() {
                 const num = slides[index].dataset.numero;
-                titulo.textContent = 'Fecha ' + num;
+                titulo.textContent = slides[index].dataset.titulo || ('Fecha ' + num);
                 prev.className = 'jr-arrow ' + (index > 0 ? 'on' : 'off');
                 next.className = 'jr-arrow ' + (index < total - 1 ? 'on' : 'off');
             }

@@ -19,11 +19,17 @@ class Torneo extends Model
         'cerrado_en' => 'datetime',
         'fecha_inicio' => 'date',
         'fecha_fin' => 'date',
+        'programacion' => 'array',
     ];
 
     public function partidos(): HasMany
     {
         return $this->hasMany(Partido::class);
+    }
+
+    public function etapas(): HasMany
+    {
+        return $this->hasMany(Etapa::class)->orderBy('orden');
     }
 
     public function equipos(): BelongsToMany

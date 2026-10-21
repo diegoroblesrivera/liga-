@@ -60,6 +60,9 @@
 
             {{-- Columna izquierda: tabla de posiciones --}}
             <div class="lg:col-span-2">
+                @if ($secciones)
+                <div class="space-y-6">@include('tablas._secciones', ['secciones' => $secciones])</div>
+                @else
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <h2 class="border-b border-gray-100 px-5 py-3 text-sm font-semibold text-gray-800">
                         Tabla de posiciones · {{ $torneo->nombre }}
@@ -106,6 +109,7 @@
                         </table>
                     </div>
                 </div>
+                @endif
             </div>
 
             {{-- Columna derecha: jornadas deslizables + goleadores --}}
@@ -126,7 +130,7 @@
                         <div class="jr-vp">
                             <div class="jr-track" id="jr-track">
                                 @foreach ($jornadas as $j)
-                                    <div class="jr-slide" data-numero="{{ $j['numero'] }}">
+                                    <div class="jr-slide" data-numero="{{ $j['numero'] }}" data-titulo="{{ $j['partidos']->first()?->ronda ? $j['partidos']->sortByDesc(fn ($x) => $x->ronda === 'final')->first()->etiqueta() : 'Fecha '.$j['numero'] }}">
                                         <div class="divide-y divide-gray-100">
                                             @foreach ($j['partidos'] as $partido)
                                                 <div class="px-5 py-3 text-sm">
@@ -205,7 +209,7 @@
 
             function encabezado() {
                 const num = slides[index].dataset.numero;
-                titulo.textContent = 'Fecha ' + num;
+                titulo.textContent = slides[index].dataset.titulo || ('Fecha ' + num);
                 prev.className = 'jr-arrow ' + (index > 0 ? 'on' : 'off');
                 next.className = 'jr-arrow ' + (index < total - 1 ? 'on' : 'off');
             }
