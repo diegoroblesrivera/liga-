@@ -42,12 +42,13 @@ class Planilla
 
         $filas = [];
         foreach ($hoja as $i => $fila) {
-            $datos = [];
+            // Todos los campos presentes (null si el archivo no trae esa columna opcional).
+            $datos = array_fill_keys(array_keys($columnas), null);
             foreach ($posicion as $campo => $col) {
                 $valor = trim((string) ($fila[$col] ?? ''));
                 $datos[$campo] = $valor === '' ? null : $valor;
             }
-            if (array_filter($datos, fn ($v) => $v !== null)) {
+            if (array_filter($datos, fn ($v) => $v !== null)) { // ignora filas vacías
                 $filas[$i + 2] = $datos; // +2: los títulos son la fila 1
             }
         }

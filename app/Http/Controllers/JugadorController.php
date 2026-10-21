@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Equipo;
 use App\Models\Jugador;
+use App\Support\LigaActual;
 use App\Models\Role;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -39,8 +40,10 @@ class JugadorController extends Controller
         $this->authorize('update', $jugador);
 
         $jugador->load('equipo');
+        // El organizador puede mover al jugador a otro equipo del campeonato.
+        $equipos = auth()->user()->hasRole('admin') ? Equipo::orderBy('nombre')->get(['id', 'nombre']) : collect();
 
-        return view('jugadores.edit', compact('jugador'));
+        return view('jugadores.edit', compact('jugador', 'equipos'));
     }
 
     public function update(Request $request, Jugador $jugador)
@@ -52,13 +55,26 @@ class JugadorController extends Controller
             'dorsal' => ['nullable', 'integer', 'min:1', 'max:99'],
             'posicion' => ['nullable', 'string', 'max:40'],
             'foto' => ['nullable', 'image', 'max:2048'],
+            'equipo_id' => ['nullable', LigaActual::existe('equipos')],
         ]);
 
-        $jugador->update([
+        $cambios = [
             'nombre' => $data['nombre'],
             'dorsal' => $data['dorsal'] ?? null,
             'posicion' => $data['posicion'] ?? null,
-        ]);
+        ];
+
+        // Cambio de equipo: solo el organizador (la regla de un equipo por campeonato se mantiene).
+        if (! empty($data['equipo_id']) && (int) $data['equipo_id'] !== $jugador->equipo_id) {
+            abort_unless($request->user()->hasRole('admin'), 403);
+            $destino = Equipo::findOrFail($data['equipo_id']);
+            if (! $destino->tieneCupoDisponible()) {
+                return back()->withErrors(['equipo_id' => "{$destino->nombre} ya tiene el plantel completo."])->withInput();
+            }
+            $cambios['equipo_id'] = $destino->id;
+        }
+
+        $jugador->update($cambios);
 
         $this->guardarFoto($request, $jugador);
 
@@ -88,8 +104,8 @@ class JugadorController extends Controller
 
         $user = $request->user();
 
-        if ($user->jugador) {
-            return back()->withErrors(['jugar' => 'Ya tienes una ficha de jugador.']);
+        if ($otro = Jugador::equipoEnLiga($user->id, $equipo->liga_id)) {
+            return back()->withErrors(['jugar' => $otro->id === $equipo->id ? 'Ya estás en el plantel de este equipo.' : Jugador::mensajeOtroEquipo($otro)]);
         }
 
         if (! $equipo->tieneCupoDisponible()) {

@@ -176,6 +176,10 @@ class CargaMasivaController extends Controller
         $dorsales = $plantel->pluck('dorsal')->filter()->map(fn ($d) => (int) $d)->all();
         $correosEnEquipo = User::whereIn('id', $plantel->pluck('user_id')->filter())->pluck('email')->map(fn ($e) => Str::lower($e))->all();
         $correosInvitados = Invitacion::where('equipo_id', $equipo->id)->whereNotNull('jugador_id')->pluck('email')->map(fn ($e) => Str::lower($e))->all();
+        // Personas del archivo que ya juegan en otro equipo de este campeonato.
+        $enOtroEquipo = User::whereIn(DB::raw('LOWER(email)'), collect($filas)->pluck('email')->filter()->map(fn ($e) => Str::lower($e)))->get(['id', 'email'])
+            ->mapWithKeys(fn ($u) => [Str::lower($u->email) => Jugador::equipoEnLiga($u->id, $equipo->liga_id)])
+            ->filter(fn ($otro) => $otro && $otro->id !== $equipo->id);
         $errores = [];
         $vistosDorsal = [];
         $vistosEmail = [];
@@ -205,6 +209,8 @@ class CargaMasivaController extends Controller
                 $e = Str::lower($f['email']);
                 if (in_array($e, $correosEnEquipo, true) || in_array($e, $correosInvitados, true)) {
                     $errores[$n][] = "{$f['email']} ya está en el plantel o invitado.";
+                } elseif ($enOtroEquipo->has($e)) {
+                    $errores[$n][] = "{$f['email']} ya juega en {$enOtroEquipo[$e]->nombre} (un jugador solo puede estar en un equipo por campeonato).";
                 } elseif (isset($vistosEmail[$e])) {
                     $errores[$n][] = "El email {$f['email']} está repetido (fila {$vistosEmail[$e]}).";
                 }

@@ -22,6 +22,19 @@
                         <x-input-error :messages="$errors->get('nombre')" class="mt-2" />
                     </div>
 
+                    @if (! empty($equipos) && $equipos->isNotEmpty())
+                        <div>
+                            <x-input-label for="equipo_id" value="Equipo" />
+                            <select id="equipo_id" name="equipo_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                @foreach ($equipos as $e)
+                                    <option value="{{ $e->id }}" @selected((int) old('equipo_id', $jugador->equipo_id) === $e->id)>{{ $e->nombre }}</option>
+                                @endforeach
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400">Solo el organizador puede cambiar a un jugador de equipo. Sus goles y logros anteriores se mantienen.</p>
+                            <x-input-error :messages="$errors->get('equipo_id')" class="mt-2" />
+                        </div>
+                    @endif
+
                     <div>
                         <x-input-label for="dorsal" value="Número de camiseta (opcional)" />
                         <x-text-input id="dorsal" name="dorsal" type="number" min="1" max="99"

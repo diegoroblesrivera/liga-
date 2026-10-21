@@ -148,8 +148,8 @@ class InscripcionController extends Controller
                 $invitacion->increment('usos');
             });
         } else {
-            if (Jugador::where('equipo_id', $equipo->id)->where('user_id', $user->id)->exists()) {
-                return back()->withErrors(['cupo' => 'Ya estás en el plantel de este equipo.']);
+            if ($otro = Jugador::equipoEnLiga($user->id, $invitacion->liga_id, $ficha?->id)) {
+                return back()->withErrors(['cupo' => $otro->id === $equipo->id ? 'Ya estás en el plantel de este equipo.' : Jugador::mensajeOtroEquipo($otro)]);
             }
             if (! $ficha && ! $equipo->tieneCupoDisponible()) {
                 return back()->withErrors(['cupo' => 'El equipo ya alcanzó su cupo máximo de jugadores.']);
