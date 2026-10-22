@@ -154,7 +154,8 @@ class ListaAsistenciaTest extends TestCase
         $gol()->assertSessionHasErrors('jugador_id');
         $this->assertSame(1, Gol::withoutGlobalScopes()->count());
 
-        $this->actingAs($this->arbitro)->get(route('partidos.show', $this->partido))->assertOk()->assertSee('Pedro Local (sin lista)');
+        $this->actingAs($this->arbitro)->get(route('partidos.show', $this->partido))->assertOk()->assertSee('Pedro Local (sin lista)')
+            ->assertSeeInOrder(['⚽', 'Registrar gol', 'Fecha y hora', 'Cancha', 'Registrar tarjeta']);
 
         $this->actingAs($this->arbitro)->post(route('lista.marcar', $this->partido), ['jugador_id' => $this->jugador->id]);
         $gol()->assertSessionHasNoErrors();

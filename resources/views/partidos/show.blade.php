@@ -211,17 +211,23 @@
 
             {{-- Lista de asistencia --}}
             @if ($conLista && ($gestionaLista || $miFicha))
-                <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                    <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <div class="bg-white p-5 shadow-sm sm:rounded-lg" x-data="{ abierta: false }">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
                         <h3 class="text-base font-medium text-gray-900">
                             📋 Lista de asistencia
                             @if ($exigeLista)<span class="ms-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700">sin lista no se juega</span>@endif
                         </h3>
-                        @if (\App\Support\Lista::puedeGestionarFecha($yo, collect([$partido])))
-                            <a href="{{ route('lista.fecha', [$partido->torneo_id, $partido->numero_fecha]) }}"
-                               class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Mostrar QR de la fecha →</a>
-                        @endif
+                        <button type="button" @click="abierta = ! abierta"
+                                class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
+                                x-text="abierta ? 'Ocultar lista' : 'Mostrar lista'">Mostrar lista</button>
                     </div>
+                    <div x-show="abierta" x-cloak class="mt-4">
+                    @if (\App\Support\Lista::puedeGestionarFecha($yo, collect([$partido])))
+                        <a href="{{ route('lista.fecha', [$partido->torneo_id, $partido->numero_fecha]) }}"
+                           class="mb-4 inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            📱 Mostrar QR de la fecha (para escanear o imprimir)
+                        </a>
+                    @endif
                     @if ($gestionaLista)
                         <div class="grid gap-4 sm:grid-cols-2">
                             @include('lista._equipo', ['equipo' => $partido->equipoLocal])
@@ -232,13 +238,16 @@
                     @else
                         <p class="text-sm text-gray-600">Aún no estás en la lista. En la cancha, escanea el QR que muestra el árbitro, el DT o la organización.</p>
                     @endif
+                    </div>
                 </div>
             @endif
 
             {{-- Registrar gol --}}
             @can('create', [App\Models\Gol::class, $partido])
-                <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                    <h3 class="mb-4 text-base font-medium text-gray-900">Registrar gol</h3>
+                <div class="border-l-4 border-cancha-500 bg-white p-6 shadow-sm sm:rounded-lg">
+                    <h3 class="mb-4 flex items-center gap-2 text-base font-semibold text-gray-900">
+                        <span class="text-2xl leading-none">⚽</span> Registrar gol
+                    </h3>
                     <form method="POST" action="{{ route('goles.store', $partido) }}"
                           class="grid grid-cols-1 gap-4 sm:grid-cols-4 sm:items-end">
                         @csrf
@@ -280,10 +289,38 @@
                 </div>
             @endcan
 
+            {{-- Datos (resumen) --}}
+            <div class="bg-white p-6 shadow-sm sm:rounded-lg">
+                <dl class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                    <div>
+                        <dt class="text-gray-500">Fecha y hora</dt>
+                        <dd class="text-gray-900">{{ $partido->fecha_hora?->format('d/m/Y H:i') ?? 'Sin definir' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Cancha</dt>
+                        <dd class="text-gray-900">{{ $partido->cancha?->nombre ?? 'Sin definir' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Árbitro</dt>
+                        <dd class="text-gray-900">{{ $partido->arbitro?->name ?? 'Sin asignar' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Jornada</dt>
+                        <dd class="text-gray-900">{{ $partido->etiqueta() }}</dd>
+                    </div>
+                </dl>
+            </div>
+
             {{-- Registrar tarjeta --}}
             @can('create', [App\Models\Tarjeta::class, $partido])
-                <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                    <h3 class="mb-4 text-base font-medium text-gray-900">Registrar tarjeta</h3>
+                <div class="border-l-4 border-yellow-400 bg-white p-6 shadow-sm sm:rounded-lg">
+                    <h3 class="mb-4 flex items-center gap-2 text-base font-semibold text-gray-900">
+                        <span class="relative inline-block h-6 w-6" aria-hidden="true">
+                            <span class="absolute left-0 top-0 h-5 w-3.5 -rotate-12 rounded-sm bg-yellow-400 ring-1 ring-yellow-500"></span>
+                            <span class="absolute left-2 top-1 h-5 w-3.5 rotate-12 rounded-sm bg-red-500 ring-1 ring-red-600"></span>
+                        </span>
+                        Registrar tarjeta
+                    </h3>
                     <form method="POST" action="{{ route('tarjetas.store', $partido) }}"
                           class="grid grid-cols-1 gap-4 sm:grid-cols-4 sm:items-end">
                         @csrf
@@ -326,28 +363,6 @@
                     <p class="mt-2 text-xs text-gray-400">Dos amarillas a un mismo jugador equivalen a roja (expulsión).</p>
                 </div>
             @endcan
-
-            {{-- Datos (resumen) --}}
-            <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                <dl class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-                    <div>
-                        <dt class="text-gray-500">Fecha y hora</dt>
-                        <dd class="text-gray-900">{{ $partido->fecha_hora?->format('d/m/Y H:i') ?? 'Sin definir' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-gray-500">Cancha</dt>
-                        <dd class="text-gray-900">{{ $partido->cancha?->nombre ?? 'Sin definir' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-gray-500">Árbitro</dt>
-                        <dd class="text-gray-900">{{ $partido->arbitro?->name ?? 'Sin asignar' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-gray-500">Jornada</dt>
-                        <dd class="text-gray-900">{{ $partido->etiqueta() }}</dd>
-                    </div>
-                </dl>
-            </div>
 
             {{-- Pago del partido --}}
             @if ($esAdminPago || ($esDtDelPartido && $partido->monto_pago !== null))
