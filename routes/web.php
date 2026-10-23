@@ -41,6 +41,7 @@ Route::post('/invitacion/{token}/aceptar', [InscripcionController::class, 'acept
 
 
 Route::get('/',[HomeController::class, 'index'])->name('home');
+Route::get('/precios', [HomeController::class, 'precios'])->name('precios');
 
 // Política de privacidad (pública)
 Route::get('/privacidad', fn () => view('legal.privacidad', [

@@ -16,6 +16,20 @@ class HomeController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        return view('home', compact('campeonatos'));
+        return view('home', [
+            'campeonatos' => $campeonatos,
+            'precio' => \App\Models\Ajuste::precioProAnual(),
+            'limite' => Liga::EQUIPOS_PLAN_GRATIS,
+        ]);
+    }
+
+    // Planes: Gratis vs Pro, con el precio vigente y los logros que solo da el Pro.
+    public function precios()
+    {
+        return view('precios', [
+            'precio' => \App\Models\Ajuste::precioProAnual(),
+            'limite' => Liga::EQUIPOS_PLAN_GRATIS,
+            'logrosPro' => collect(\App\Support\Logros\Catalogo::LOGROS)->filter(fn ($l) => $l['pro']),
+        ]);
     }
 }

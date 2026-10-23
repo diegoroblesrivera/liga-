@@ -15,7 +15,12 @@
             <a href="{{ url('/') }}" aria-label="{{ config('app.name') }}">
                 <x-logo class="text-xl" />
             </a>
-            <nav class="text-sm">
+            <nav class="flex items-center gap-5 text-sm">
+                {{-- Atajos a las secciones de la portada (y a precios) --}}
+                <a href="{{ route('home') }}#funciones" class="hidden text-gray-300 hover:text-white md:inline">Funciones</a>
+                <a href="{{ route('home') }}#como-funciona" class="hidden text-gray-300 hover:text-white md:inline">Cómo funciona</a>
+                <a href="{{ route('precios') }}" class="{{ request()->routeIs('precios') ? 'text-white font-semibold' : 'text-gray-300' }} hover:text-white">Planes</a>
+                <a href="{{ route('home') }}#campeonatos" class="hidden text-gray-300 hover:text-white md:inline">Campeonatos</a>
                 @auth
                     <a href="{{ route('dashboard') }}" class="rounded-md bg-cancha-400 px-3 py-1.5 font-semibold text-balon hover:bg-cancha-300">
                         Ir al panel

@@ -47,6 +47,7 @@
             <ul class="mt-2 space-y-1 text-white/90">
                 <li><a href="{{ route('home') }}#campeonatos" class="hover:text-white hover:underline">Campeonatos públicos</a></li>
                 <li><a href="{{ route('campeonatos.create') }}" class="hover:text-white hover:underline">Crear campeonato</a></li>
+                <li><a href="{{ route('precios') }}" class="hover:text-white hover:underline">Planes y precios</a></li>
             </ul>
         </nav>
     </div>
