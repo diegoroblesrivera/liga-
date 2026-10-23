@@ -115,8 +115,13 @@
 
                     @if ($porPersona)
                         <p class="mt-1 text-sm text-gray-500">
+                            @if ($pichanga->esCuotaFija())
+                                Cuota fija: <strong>${{ number_format($porPersona, 0, ',', '.') }} por persona</strong>
+                                (se recaudan ${{ number_format($porPersona * $confirmados->count(), 0, ',', '.') }}) ·
+                            @else
                             Total ${{ number_format($pichanga->totalAPagar(), 0, ',', '.') }}{{ $pichanga->pago_modo === 'mitad' ? ' (mitad de la cancha)' : '' }}
                             ÷ {{ $confirmados->count() }} = <strong>${{ number_format($porPersona, 0, ',', '.') }} por persona</strong> ·
+                            @endif
                             pagaron {{ $confirmados->where('pagado', true)->count() }} de {{ $confirmados->count() }}
                         </p>
                     @endif

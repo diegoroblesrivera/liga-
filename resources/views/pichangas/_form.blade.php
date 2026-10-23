@@ -53,6 +53,8 @@
      x-data="{
         rival: @js((bool) old('tiene_rival', $pichanga->tiene_rival ?? false)),
         modo: @js(old('pago_modo', $pichanga->pago_modo ?? 'completa')),
+        cobro: @js(old('cobro', $pichanga->cobro ?? 'dividido')),
+        cuota: @js((string) old('cuota', $pichanga->cuota ?? '')),
         precio: @js((string) old('precio', $pichanga->precio ?? '')),
         get total() {
             const p = parseInt(this.precio, 10);
@@ -83,6 +85,31 @@
 
     {{-- Pago --}}
     <div class="border-t border-gray-100 pt-4">
+        <span class="block text-sm font-medium text-gray-700">¿Cómo se cobra?</span>
+        <div class="mt-2 grid gap-2 sm:grid-cols-2">
+            <label class="flex cursor-pointer items-start gap-2 rounded-md border p-3 text-sm" :class="cobro === 'dividido' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'">
+                <input type="radio" name="cobro" value="dividido" x-model="cobro" class="mt-0.5 border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                <span><strong>Dividir la cancha</strong><span class="block text-gray-500">El valor total se divide entre los confirmados de cada fecha.</span></span>
+            </label>
+            <label class="flex cursor-pointer items-start gap-2 rounded-md border p-3 text-sm" :class="cobro === 'cuota' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'">
+                <input type="radio" name="cobro" value="cuota" x-model="cobro" class="mt-0.5 border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                <span><strong>Cuota fija por persona</strong><span class="block text-gray-500">Cada uno paga lo mismo, sin importar cuántos se anoten.</span></span>
+            </label>
+        </div>
+        <x-input-error :messages="$errors->get('cobro')" class="mt-2" />
+
+        <div x-show="cobro === 'cuota'" x-cloak class="mt-4">
+            <x-input-label for="cuota" value="Cuota por persona" />
+            <x-text-input id="cuota" name="cuota" type="number" min="1" step="1" class="mt-1 block w-full sm:w-48"
+                          x-model="cuota" placeholder="3000" />
+            <x-input-error :messages="$errors->get('cuota')" class="mt-2" />
+            <p class="mt-2 rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-700" x-show="parseInt(cuota, 10) > 0">
+                Cada confirmado paga <strong x-text="pesos(parseInt(cuota, 10))"></strong>.
+            </p>
+        </div>
+    </div>
+
+    <div x-show="cobro === 'dividido'" class="border-t border-gray-100 pt-4">
         <x-input-label for="precio" value="Valor de la cancha completa (opcional)" />
         <x-text-input id="precio" name="precio" type="number" min="1" step="1" class="mt-1 block w-full sm:w-48"
                       x-model="precio" :value="old('precio', $pichanga->precio ?? '')" />
@@ -107,6 +134,9 @@
             Total a pagar: <strong x-text="total ? pesos(total) : ''"></strong>,
             dividido entre los confirmados de cada fecha.
         </p>
+    </div>
+
+    <div class="border-t border-gray-100 pt-4">
 
         <div class="mt-4">
             <x-input-label for="datos_transferencia" value="Datos para transferir (opcional)" />

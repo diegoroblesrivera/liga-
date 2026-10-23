@@ -19,7 +19,7 @@ class Pichanga extends Model
 
     protected $fillable = [
         'nombre', 'descripcion', 'lugar', 'dia_semana', 'hora', 'duracion_min',
-        'cupo', 'tiene_rival', 'rival_nombre', 'precio', 'pago_modo', 'datos_transferencia',
+        'cupo', 'tiene_rival', 'rival_nombre', 'precio', 'cobro', 'cuota', 'pago_modo', 'datos_transferencia',
         'organizador_id', 'token', 'activa',
     ];
 
@@ -29,6 +29,7 @@ class Pichanga extends Model
         'cupo' => 'integer',
         'tiene_rival' => 'boolean',
         'precio' => 'integer',
+        'cuota' => 'integer',
         'activa' => 'boolean',
     ];
 
@@ -108,6 +109,11 @@ class Pichanga extends Model
         return $this->rival_nombre ?: 'Rival';
     }
 
+    public function esCuotaFija(): bool
+    {
+        return $this->cobro === 'cuota';
+    }
+
     // Lo que paga el grupo: la cancha completa o la mitad (la otra mitad la paga el rival).
     public function totalAPagar(): ?int
     {
@@ -122,6 +128,11 @@ class Pichanga extends Model
     // para no cobrar montos raros (2.789 → 2.800, 2.714 → 2.750, 2.700 → 2.700).
     public function precioPorPersona(int $confirmados): ?int
     {
+        // Cuota fija: cada uno paga lo mismo, sin importar cuántos se anoten.
+        if ($this->esCuotaFija()) {
+            return $this->cuota ?: null;
+        }
+
         $total = $this->totalAPagar();
 
         if (! $total || $confirmados === 0) {

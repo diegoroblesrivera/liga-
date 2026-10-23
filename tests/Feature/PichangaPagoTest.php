@@ -158,4 +158,41 @@ class PichangaPagoTest extends TestCase
             ->assertSee('✓ Pagado')
             ->assertSee('marcado por el organizador');
     }
+
+    public function test_dividir_la_cancha_reparte_el_total_entre_los_confirmados(): void
+    {
+        // 28.000 / 2 confirmados
+        $this->assertSame(14000, $this->pichanga->precioPorPersona(2));
+        $this->actingAs($this->org)->get(route('pichangas.fechas.show', $this->fecha))->assertOk()->assertSeeText('÷ 2 = $14.000 por persona');
+    }
+
+    public function test_cuota_fija_cobra_lo_mismo_sin_importar_cuantos_se_anoten(): void
+    {
+        $datos = ['nombre' => 'Martes', 'dia_semana' => 2, 'hora' => '21:00', 'duracion_min' => 60, 'cupo' => 14,
+            'pago_modo' => 'completa', 'cobro' => 'cuota', 'cuota' => 3500, 'precio' => 28000, 'activa' => 1];
+
+        $this->actingAs($this->org)->put(route('pichangas.update', $this->pichanga), $datos)->assertSessionHasNoErrors();
+        $p = $this->pichanga->fresh();
+        $this->assertSame(['cuota', 3500, null], [$p->cobro, $p->cuota, $p->precio], 'Guarda solo el monto del modo elegido');
+        $this->assertSame(3500, $p->precioPorPersona(2));
+        $this->assertSame(3500, $p->precioPorPersona(11));
+
+        $this->actingAs($this->org)->get(route('pichangas.fechas.show', $this->fecha))->assertOk()
+            ->assertSeeText('Cuota fija: $3.500 por persona')->assertSeeText('se recaudan $7.000');
+        $this->actingAs($this->jugador)->get(route('pichangas.show', $this->pichanga))->assertOk()->assertSee('Tu pago: $3.500', false);
+
+        // Sin monto de cuota no se puede guardar
+        $this->actingAs($this->org)->put(route('pichangas.update', $this->pichanga), ['cuota' => null] + $datos)->assertSessionHasErrors('cuota');
+
+        // Volver a dividir la cancha
+        $this->actingAs($this->org)->put(route('pichangas.update', $this->pichanga), ['cobro' => 'dividido', 'cuota' => null, 'precio' => 30000] + $datos)->assertSessionHasNoErrors();
+        $this->assertSame(15000, $this->pichanga->fresh()->precioPorPersona(2));
+    }
+
+    public function test_el_formulario_muestra_las_dos_opciones_de_cobro(): void
+    {
+        $this->actingAs($this->org)->get(route('pichangas.edit', $this->pichanga))->assertOk()
+            ->assertSee('Dividir la cancha')->assertSee('Cuota fija por persona')->assertSee('name="cobro"', false);
+        $this->actingAs($this->org)->get(route('pichangas.create'))->assertOk()->assertSee('Cuota fija por persona');
+    }
 }

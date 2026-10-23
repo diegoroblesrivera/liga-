@@ -58,7 +58,11 @@
                                 @endif
                                 @if ($porPersona)
                                     · ${{ number_format($porPersona, 0, ',', '.') }} c/u
-                                    <span class="text-gray-400">(total ${{ number_format($pichanga->totalAPagar(), 0, ',', '.') }}{{ $pichanga->pago_modo === 'mitad' ? ', mitad de la cancha' : '' }})</span>
+                                    @if ($pichanga->esCuotaFija())
+                                        <span class="text-gray-400">(cuota fija)</span>
+                                    @else
+                                        <span class="text-gray-400">(total ${{ number_format($pichanga->totalAPagar(), 0, ',', '.') }}{{ $pichanga->pago_modo === 'mitad' ? ', mitad de la cancha' : '' }})</span>
+                                    @endif
                                 @endif
                             </div>
                             @unless ($fecha->estaAbierta())

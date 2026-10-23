@@ -178,12 +178,22 @@ class PichangaController extends Controller
             'cupo' => ['required', 'integer', 'min:2', 'max:50'],
             'tiene_rival' => ['boolean'],
             'rival_nombre' => ['nullable', 'string', 'max:120'],
+            'cobro' => ['nullable', Rule::in(['dividido', 'cuota'])],
             'precio' => ['nullable', 'integer', 'min:1'],
+            'cuota' => ['nullable', 'required_if:cobro,cuota', 'integer', 'min:1'],
             'pago_modo' => ['required', Rule::in(['completa', 'mitad'])],
             'datos_transferencia' => ['nullable', 'string', 'max:500'],
         ]);
 
         $data['tiene_rival'] = $request->boolean('tiene_rival');
+
+        // Se guarda solo el monto del modo elegido (por defecto, dividir la cancha).
+        $data['cobro'] ??= 'dividido';
+        if ($data['cobro'] === 'cuota') {
+            $data['precio'] = null;
+        } else {
+            $data['cuota'] = null;
+        }
 
         // Sin rival no se guarda nombre.
         if (! $data['tiene_rival']) {
